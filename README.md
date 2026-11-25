@@ -15,7 +15,7 @@ Este README está pensado para que cualquiera lo reproduzca en su computadora, a
 | Programa (código) | Valida el archivo, compara existencia contra mínimo, calcula cantidades, agrupa por proveedor, genera el borrador con una plantilla fija, aplica límites, guarda estados e historial | Decidir por la persona |
 | IA (OpenAI por API oficial con clave, modelo `gpt-6-luna`) | Clasifica la intención del texto libre (lista cerrada) y explica la propuesta con las cifras del programa | Calcular o cambiar cantidades, aprobar, escribir el borrador, enviar |
 
-> **La conexión real con la IA aún no está verificada; si no responde, verás plantillas «(sin IA)».** Los cálculos, la aprobación y el borrador no dependen de la IA.
+> Conexión con la IA verificada el 2026-11-25 con el modelo gpt-6-luna; si la IA no está disponible o se agota el cupo, el bot responde con plantillas "(sin IA)". Los cálculos, la aprobación y el borrador no dependen de la IA.
 | Persona | Informa la temporada, revisa, aprueba o rechaza con botones, y enviaría el pedido | — |
 
 La regla de cálculo es una **propuesta para la demo, no política confirmada del restaurante**: un insumo entra al pedido si `existencia < mínimo`; cantidad = `máximo − existencia`, redondeada hacia arriba; el ajuste por temporada (−50 % a +50 %, global, por proveedor o por insumo) se redondea hacia arriba y nunca supera el máximo. Está en `backend/src/config.ts` y `backend/src/engine.ts`.
@@ -51,7 +51,7 @@ No hay servidor permanente: el bot existe mientras el proceso corre. Al cerrarlo
 - Git.
 - Telegram en el teléfono y un **bot propio** creado con @BotFather (`/newbot`), que te da su token. No reutilices el token de otro bot ni el de la demo.
 - Una **clave de API de OpenAI** de un proyecto con **tope duro de gasto** configurado en el panel de OpenAI. Las consultas se cobran por uso a quien pone la clave. El bot usa el modelo `gpt-6-luna` mediante la Responses API; se cambia con `OPENAI_MODEL` en `.dev.vars`.
-  La conexión real con la IA aún no está verificada; si no responde, verás plantillas «(sin IA)».
+  Conexión con la IA verificada el 2026-11-25 con el modelo gpt-6-luna; si la IA no está disponible o se agota el cupo, el bot responde con plantillas "(sin IA)".
 - No hace falta cuenta de Cloudflare para correrlo en local.
 
 ## Arranque local

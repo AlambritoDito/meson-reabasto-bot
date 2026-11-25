@@ -99,7 +99,7 @@ Secuencia general del reto [caso]: se exporta el inventario, se detectan los ins
 1. El encargado abre el bot (`/start`) y envía el archivo CSV/XLSX o usa `/muestra`.
 2. El programa valida y señala por fila y campo los datos faltantes o inválidos.
 3. El programa marca los insumos bajo mínimo, calcula las cantidades y las agrupa por proveedor.
-4. Opcional: `/explicar` o texto libre; la IA explica con las cifras calculadas.
+4. Opcional: `/explicar` o texto libre; la IA explica con las cifras calculadas y cita, por insumo, existencia, mínimo, máximo y cantidad, más el total (ajuste tras la prueba con el modelo real del 2026-11-25).
 5. Opcional: `/temporada` con un porcentaje; el bot muestra antes y después y aplica el ajuste solo si se confirma. Cada ajuste crea una nueva versión e invalida una aprobación anterior.
 6. `/aprobar` muestra la propuesta vigente con los botones **Aprobar** y **Rechazar**.
 7. Si se aprueba, el bot envía el borrador como archivo de texto (también con `/borrador`). Si se rechaza, no genera borrador y sugiere ajustar o cargar otro inventario.

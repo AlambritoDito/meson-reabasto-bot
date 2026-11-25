@@ -95,7 +95,7 @@ async function openai() {
   if (only.includes('exp'))
     await run('explicación de propuesta (fixture)', async () => {
       const t = await explain(client, p);
-      return { valid: t !== null, nota: t ? t.replace(/\s+/g, ' ').slice(0, 400) : 'rechazada por cifras no presentes en los hechos (control numbersGrounded)' };
+      return { valid: t !== null, nota: t ? t.replace(/\s+/g, ' ').slice(0, 1200) : 'rechazada por cifras no presentes en los hechos (control numbersGrounded)' };
     });
   if (only.includes('draft'))
     await run('redacción de borrador a proveedor (prueba de capacidad, no conectada al producto)', async () => {
