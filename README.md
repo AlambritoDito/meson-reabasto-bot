@@ -4,6 +4,7 @@ Bot de Telegram de demostración para el reabastecimiento de un restaurante, hec
 
 - Bot de la demo: [t.me/mesondemobot](https://t.me/mesondemobot). Solo responde durante las sesiones de demostración (hasta el 10 de diciembre de 2026), mientras corre en el equipo de la persona responsable. Fuera de ellas el chat abre, pero no hay respuesta.
 - Página explicativa: [alambritodito.github.io/meson-reabasto-bot](https://alambritodito.github.io/meson-reabasto-bot/) (código en `site/`, publicada con GitHub Pages).
+- Índice de entrega: [`docs/ENTREGA.md`](docs/ENTREGA.md) (equipo, entregables y cómo ejecutarlo).
 - Documentación del agente: `docs/` (`agente.md` en versión de entrega del 2026-11-25; supuestos y pendientes en `docs/pendientes.md`).
 
 Este README está pensado para que cualquiera lo reproduzca en su computadora, a mano o con un asistente de programación (por ejemplo Claude Code o Codex): los pasos son comandos explícitos y no hay servicios ocultos.
@@ -144,6 +145,10 @@ docs/       agente.md, configuración, registro de pruebas, pendientes, hoja de 
 ## Nota opcional: despliegue en Cloudflare (no probado)
 
 El código corre sobre el runtime de Cloudflare Workers, así que en principio podría desplegarse con `wrangler deploy`, una base D1 remota, *secrets* y un webhook de Telegram en lugar del poller. **Esta ruta no se ha probado ni se usa en la demo**; si alguien la sigue, debe revisar las cuotas de Cloudflare, autenticar el webhook con un secreto y eliminar el webhook (`deleteWebhook`) y el Worker (`wrangler delete`) al terminar.
+
+## Equipo y créditos
+
+Equipo 3: Alan Pérez Fernández, Santiago Vázquez Llanes, Santiago Pineda Sotelo y Julián González Lepe.
 
 ## Licencia
 

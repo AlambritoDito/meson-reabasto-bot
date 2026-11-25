@@ -2,7 +2,7 @@
 
 > Respuestas del equipo tal como las entregó. No se han corregido ni completado. Las tensiones entre respuestas están en `pendientes.md` para que el equipo decida.
 
-Reto: **Reto 2 · Reabastecimiento** · Equipo: Equipo 3 (según la descripción pública del bot) · Integrantes: pendiente de añadir por el equipo
+Reto: **Reto 2 · Reabastecimiento** · Equipo: Equipo 3 · Integrantes: Alan Pérez Fernández, Santiago Vázquez Llanes, Santiago Pineda Sotelo y Julián González Lepe
 
 ## 1. Posibilidades
 Tres posibles usos de un agente para este problema, y cuál escogió el equipo y por qué.

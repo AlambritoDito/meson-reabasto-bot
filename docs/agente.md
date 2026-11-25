@@ -1,6 +1,6 @@
 # agente.md · MesonBot, agente de reabastecimiento
 
-> **Versión de entrega · 2026-11-25.** Equipo 3 [según la descripción pública del bot] · Integrantes: pendiente de añadir por el equipo.
+> **Versión de entrega · 2026-11-25.** Equipo 3 · Integrantes: Alan Pérez Fernández, Santiago Vázquez Llanes, Santiago Pineda Sotelo y Julián González Lepe.
 
 **Etiquetas.** Cada afirmación lleva su origen:
 

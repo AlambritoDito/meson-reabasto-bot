@@ -25,7 +25,6 @@ Acompaña a `agente.md` (versión de entrega, 2026-11-25). Aquí se reúnen todo
 
 | # | Pendiente | Dónde (agente.md) |
 |---|---|---|
-| P1 | Integrantes del equipo (el nombre «Equipo 3» viene de la descripción pública del bot) | encabezado |
 | P2 | Meta numérica del indicador, fórmula exacta y frecuencia de revisión | §2, §14 |
 | P3 | Si «encargado de inventarios o compras» y «responsable de compras» son la misma persona | §3 |
 | P4 | Plazo de respuesta del aprobador | §6 |
