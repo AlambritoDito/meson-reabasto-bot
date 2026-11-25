@@ -1,9 +1,8 @@
 // Punto de entrada del Worker: GET /health y POST /tg (webhook de Telegram). Procesamiento síncrono e idempotente.
-import { LIMITS, DEFAULT_MODEL } from './config';
+import { LIMITS, DEFAULT_MAX_AI_CALLS_TOTAL } from './config';
 import { Store } from './db';
-import { GeminiClient } from './gemini';
+import { OpenAiClient, type LlmClient, type ReasoningEffort } from './llm';
 import { HttpTelegram, type TelegramClient } from './telegram';
-import type { LlmClient } from './gemini';
 import { handleUpdate, type TgUpdate } from './bot';
 import type { Env, FetchFn } from './types';
 
@@ -13,6 +12,8 @@ export interface AppOverrides {
   now?: () => number;
   randomId?: () => string;
 }
+
+const EFFORTS: ReasoningEffort[] = ['none', 'minimal', 'low', 'medium', 'high'];
 
 function timingSafeEqual(a: string, b: string): boolean {
   const ea = new TextEncoder().encode(a);
@@ -44,8 +45,9 @@ export async function handleRequest(req: Request, env: Env, o: AppOverrides = {}
   const now = o.now ?? Date.now;
   const store = new Store(env.DB, now);
   const fetchFn: FetchFn = (i, init) => fetch(i, init);
-  const tg = o.tg ?? new HttpTelegram(fetchFn, env.TELEGRAM_BOT_TOKEN);
-  const llm = o.llm ?? new GeminiClient(fetchFn, env.GEMINI_API_KEY, env.GEMINI_MODEL || DEFAULT_MODEL);
+  const tg = o.tg ?? new HttpTelegram(fetchFn, env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_API_BASE);
+  const llm = o.llm ?? new OpenAiClient(fetchFn, env.OPENAI_API_KEY, env.OPENAI_MODEL, EFFORTS.includes(env.OPENAI_REASONING_EFFORT as ReasoningEffort) ? (env.OPENAI_REASONING_EFFORT as ReasoningEffort) : 'low');
+  const maxTotal = Number.parseInt(env.MAX_AI_CALLS_TOTAL ?? '', 10);
 
   const st = await store.beginUpdate(update.update_id);
   if (st.status === 'done') return json(200, { ok: true, duplicate: true });
@@ -65,7 +67,9 @@ export async function handleRequest(req: Request, env: Env, o: AppOverrides = {}
   }
 
   try {
-    await handleUpdate(update, { store, tg, llm, now, demoUntil: env.DEMO_UNTIL, randomId: o.randomId });
+    // Retención perezosa (7 días): en local no hay cron, se limpia en cada update.
+    await store.cleanup();
+    await handleUpdate(update, { store, tg, llm, now, demoUntil: env.DEMO_UNTIL, maxAiTotal: Number.isFinite(maxTotal) && maxTotal >= 0 ? maxTotal : DEFAULT_MAX_AI_CALLS_TOTAL, randomId: o.randomId });
     await store.finishUpdate(update.update_id);
     return json(200, { ok: true });
   } catch (e) {

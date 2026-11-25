@@ -1,0 +1,20 @@
+# Ejecución LOCAL con `wrangler dev` (sin cuenta de Cloudflare). D1 local persistido en backend/.wrangler/state.
+name = "meson-reabasto-bot"
+main = "src/index.ts"
+compatibility_date = "2025-11-01"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.csv"]
+fallthrough = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "reto2-demo"
+# Identificador de relleno: en local no se usa una base remota. Solo cambiarlo si algún día se despliega (no probado).
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[dev]
+ip = "127.0.0.1"
+port = 8787

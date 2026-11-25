@@ -38,4 +38,4 @@ export const LIMITS = {
   maxWebhookBodyBytes: 1024 * 1024,
 } as const;
 
-export const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+export const DEFAULT_MAX_AI_CALLS_TOTAL = 1000;

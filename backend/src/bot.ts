@@ -4,7 +4,7 @@ import { parseCsv } from './csv';
 import { buildProposal, emptyAdjustments, previewAdjustment, validateInventory, type AdjustmentRequest, type Validation } from './engine';
 import type { Session, Store } from './db';
 import type { TelegramClient, Keyboard } from './telegram';
-import type { LlmClient } from './gemini';
+import { LlmError, type LlmClient } from './llm';
 import { classify, explain, type Intent } from './ai';
 import { Quota, demoActive } from './limits';
 import { HELP, SIN_IA, WELCOME, draftText, previewText, summaryText } from './render';
@@ -35,6 +35,7 @@ export interface Deps {
   llm: LlmClient;
   now: () => number;
   demoUntil?: string;
+  maxAiTotal?: number;
   rule?: RuleConfig;
   randomId?: () => string;
 }
@@ -44,6 +45,11 @@ const defaultRandomId = () => {
   crypto.getRandomValues(b);
   return [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
 };
+
+function aiFailText(e: unknown): string {
+  if (e instanceof LlmError && e.kind === 'tope_gasto') return 'La demo alcanzó su tope de gasto de IA; sigo con plantillas.';
+  return 'No pude consultar la IA ahora.';
+}
 
 export async function handleUpdate(u: TgUpdate, d: Deps): Promise<void> {
   const bot = new Bot(d);
@@ -57,7 +63,7 @@ class Bot {
   rid: () => string;
   constructor(private d: Deps) {
     this.rule = d.rule ?? DEFAULT_RULE;
-    this.quota = new Quota(d.store, d.now);
+    this.quota = new Quota(d.store, d.now, d.maxAiTotal);
     this.rid = d.randomId ?? defaultRandomId;
   }
 
@@ -113,12 +119,12 @@ class Bot {
 
   async onFreeText(chatId: number, text: string): Promise<void> {
     const r = await this.quota.reserveAi(chatId);
-    if (!r.ok) return this.say(chatId, `${SIN_IA} Llegaste al límite de IA (${r.reason === 'minuto' ? 'por minuto' : r.reason === 'dia' ? 'diario' : 'global de la demo'}). Usa los comandos: /ayuda`);
+    if (!r.ok) return this.say(chatId, `${SIN_IA} Llegaste al límite de IA (${r.reason === 'minuto' ? 'por minuto' : r.reason === 'dia' ? 'diario' : r.reason === 'global' ? 'global diario de la demo' : 'total de la demo'}). Usa los comandos: /ayuda`);
     let intent: Intent | null = null;
     try {
       intent = await classify(this.d.llm, text);
-    } catch {
-      return this.say(chatId, `${SIN_IA} No pude consultar la IA ahora. Usa los comandos: /ayuda`);
+    } catch (e) {
+      return this.say(chatId, `${SIN_IA} ${aiFailText(e)} Usa los comandos: /ayuda`);
     }
     if (!intent) return this.say(chatId, `${SIN_IA} No entendí tu mensaje. Usa los comandos: /ayuda`);
     switch (intent.intent) {
@@ -190,8 +196,8 @@ class Bot {
     try {
       const t = await explain(this.d.llm, p);
       return this.say(chatId, t ? `${t}\n\n(Explicación redactada por IA; las cifras oficiales son las de la propuesta.)` : template());
-    } catch {
-      return this.say(chatId, template());
+    } catch (e) {
+      return this.say(chatId, e instanceof LlmError && e.kind === 'tope_gasto' ? `${template()}\n(La demo alcanzó su tope de gasto de IA.)` : template());
     }
   }
 
@@ -256,7 +262,7 @@ class Bot {
     const u = await this.quota.usage(chatId);
     return this.say(
       chatId,
-      `Tu uso hoy (día UTC):\n• IA: ${u.aiDay}/${LIMITS.aiPerDayPerChat} por día, ${u.aiMin}/${LIMITS.aiPerMinutePerChat} este minuto\n• Archivos: ${u.files}/${LIMITS.filesPerDayPerChat}\n• IA global de la demo: ${u.aiGlobal}/${LIMITS.aiPerDayGlobal}\nSi la IA se agota, respondo con plantillas marcadas ${SIN_IA}.`,
+      `Tu uso hoy (día UTC):\n• IA: ${u.aiDay}/${LIMITS.aiPerDayPerChat} por día, ${u.aiMin}/${LIMITS.aiPerMinutePerChat} este minuto\n• Archivos: ${u.files}/${LIMITS.filesPerDayPerChat}\n• IA global de la demo hoy: ${u.aiGlobal}/${LIMITS.aiPerDayGlobal}; acumulado ${u.aiTotal}/${u.maxTotal}\nSi la IA se agota, respondo con plantillas marcadas ${SIN_IA}.`,
     );
   }
 

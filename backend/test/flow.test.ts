@@ -1,4 +1,4 @@
-// Pruebas de recorrido con DOBLES DE PRUEBA de Telegram, Gemini y D1. No son evidencia de IA ni Telegram reales.
+// Pruebas de recorrido con DOBLES DE PRUEBA de Telegram, OpenAI y D1. No son evidencia de IA ni Telegram reales.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { makeApp } from './fakes';
@@ -168,7 +168,7 @@ describe('casos docentes D01–D05 (dobles de prueba)', () => {
   });
 });
 
-describe('IA: salida inválida, fallo y contenido hostil (doble de prueba de Gemini)', () => {
+describe('IA: salida inválida, fallo y contenido hostil (doble de prueba de OpenAI)', () => {
   it('intención inventada por la IA se rechaza sin cambiar estado', async () => {
     const app = makeApp();
     await loadMuestra(app);

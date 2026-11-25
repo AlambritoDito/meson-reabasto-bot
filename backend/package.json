@@ -1,13 +1,16 @@
 {
-  "name": "reto2-reabasto-backend",
+  "name": "meson-reabasto-bot-backend",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "dev": "wrangler dev --local",
-    "db:migrate:local": "wrangler d1 migrations apply reto2-demo --local"
+    "demo": "node scripts/demo.mjs",
+    "stop": "node scripts/stop.mjs",
+    "dev": "wrangler dev --local --ip 127.0.0.1 --port 8787",
+    "db:migrate:local": "wrangler d1 migrations apply reto2-demo --local",
+    "e2e:local": "node scripts/e2e-local.mjs"
   },
   "devDependencies": {
     "typescript": "5.9.3",
@@ -16,5 +19,8 @@
   },
   "dependencies": {
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "engines": {
+    "node": ">=22.13"
   }
 }

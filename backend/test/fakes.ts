@@ -1,9 +1,9 @@
-// DOBLES DE PRUEBA. Nada aquí acredita una llamada real a Telegram, Gemini o D1 remoto.
+// DOBLES DE PRUEBA. Nada aquí acredita una llamada real a Telegram, OpenAI o D1 remoto.
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import type { D1Database, D1PreparedStatement, D1Result, Env } from '../src/types';
 import type { TelegramClient, Keyboard } from '../src/telegram';
-import type { LlmClient } from '../src/gemini';
+import type { LlmClient } from '../src/llm';
 import { handleRequest } from '../src/index';
 
 /** Doble de D1 respaldado por SQLite en memoria (node:sqlite) con el mismo esquema de migrations/. */
@@ -14,7 +14,12 @@ export class FakeD1 implements D1Database {
   }
   prepare(sql: string): D1PreparedStatement {
     const self = this;
-    const make = (params: unknown[]): D1PreparedStatement => ({
+    const make = (params: unknown[]): D1PreparedStatement => {
+      const runSync = () => {
+        const r = self.db.prepare(sql).run(...(params as never[]));
+        return { results: [], meta: { changes: Number(r.changes) } };
+      };
+      return {
       bind: (...v: unknown[]) => make(v),
       async first<T>() {
         const r = self.db.prepare(sql).all(...(params as never[]));
@@ -25,17 +30,19 @@ export class FakeD1 implements D1Database {
         return { results: r as T[], meta: { changes: 0 } } as D1Result<T>;
       },
       async run() {
-        const r = self.db.prepare(sql).run(...(params as never[]));
-        return { results: [], meta: { changes: Number(r.changes) } };
+        return runSync();
       },
-    });
+      _runSync: runSync,
+    } as D1PreparedStatement;
+    };
     return make([]);
   }
+  // Síncrono, como el batch atómico de D1: no intercala otras sentencias dentro de la transacción.
   async batch(stmts: D1PreparedStatement[]) {
     this.db.exec('BEGIN');
     try {
       const out = [];
-      for (const s of stmts) out.push(await s.run());
+      for (const s of stmts) out.push((s as unknown as { _runSync: () => D1Result })._runSync());
       this.db.exec('COMMIT');
       return out;
     } catch (e) {
@@ -96,7 +103,7 @@ export class FakeTelegram implements TelegramClient {
   }
 }
 
-/** Doble de prueba del LLM (Gemini). Devuelve respuestas programadas o lanza errores. */
+/** Doble de prueba del LLM (OpenAI). Devuelve respuestas programadas o lanza errores. */
 export class FakeLlm implements LlmClient {
   calls: { system: string; user: string }[] = [];
   queue: (string | Error)[] = [];
@@ -111,7 +118,7 @@ export class FakeLlm implements LlmClient {
 
 export const SECRET = 'test-webhook-secret-no-real';
 
-export function makeApp(opts: { demoUntil?: string; now?: () => number } = {}) {
+export function makeApp(opts: { demoUntil?: string; now?: () => number; maxTotal?: string } = {}) {
   const db = new FakeD1();
   const tg = new FakeTelegram();
   const llm = new FakeLlm();
@@ -121,9 +128,10 @@ export function makeApp(opts: { demoUntil?: string; now?: () => number } = {}) {
   const env: Env = {
     DB: db,
     TELEGRAM_BOT_TOKEN: 'fake-token',
-    GEMINI_API_KEY: 'fake-key',
+    OPENAI_API_KEY: 'fake-key',
     WEBHOOK_SECRET: SECRET,
-    GEMINI_MODEL: 'fake-model',
+    OPENAI_MODEL: 'fake-model',
+    MAX_AI_CALLS_TOTAL: opts.maxTotal ?? '1000',
     DEMO_UNTIL: opts.demoUntil ?? '2026-12-31T23:59:59-06:00',
   };
   let updateId = 1000;
@@ -137,6 +145,10 @@ export function makeApp(opts: { demoUntil?: string; now?: () => number } = {}) {
     });
     return handleRequest(req, env, { tg, llm, now, randomId });
   };
+  const postRaw = (body: string, secret = SECRET, method = 'POST', path = '/tg') => {
+    const req = new Request(`https://demo.invalid${path}`, { method, headers: { 'x-telegram-bot-api-secret-token': secret }, body: method === 'GET' ? undefined : body });
+    return handleRequest(req, env, { tg, llm, now, randomId });
+  };
   const msg = (chatId: number, text: string, extra: Record<string, unknown> = {}) =>
     post({ update_id: ++updateId, message: { message_id: ++seq, chat: { id: chatId, type: 'private' }, from: { id: chatId }, text, ...extra } });
   const click = (chatId: number, data: string, fromId = chatId) =>
@@ -146,5 +158,5 @@ export function makeApp(opts: { demoUntil?: string; now?: () => number } = {}) {
     tg.files.set(fid, bytes);
     return post({ update_id: ++updateId, message: { message_id: ++seq, chat: { id: chatId, type: 'private' }, from: { id: chatId }, document: { file_id: fid, file_name: name, file_size: size } } });
   };
-  return { db, tg, llm, env, post, msg, click, doc, advance: (ms: number) => (clock += ms), nextUpdateId: () => ++updateId };
+  return { db, tg, llm, env, post, postRaw, msg, click, doc, advance: (ms: number) => (clock += ms), nextUpdateId: () => ++updateId };
 }

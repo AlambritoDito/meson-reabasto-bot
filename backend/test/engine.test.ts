@@ -124,3 +124,14 @@ describe('ajuste por temporada (D04)', () => {
     expect(q['Arroz']).toBe(21); // 21*1.1=23.1 -> 24 > tope 21
   });
 });
+
+describe('fixtures/casos-docentes.json', () => {
+  it('define D01–D05, referencia fixtures existentes y no trae resultados obtenidos', () => {
+    const j = JSON.parse(fx('casos-docentes.json'));
+    expect(j.casos.map((c: { id: string }) => c.id)).toEqual(['D01', 'D02', 'D03', 'D04', 'D05']);
+    for (const c of j.casos) {
+      if (c.entrada.archivo) expect(() => fx(c.entrada.archivo)).not.toThrow();
+      expect(c).not.toHaveProperty('obtenido');
+    }
+  });
+});

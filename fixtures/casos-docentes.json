@@ -1,0 +1,35 @@
+{
+  "nota": "Casos de prueba propuestos para la demo con datos ficticios. La regla es la «regla propuesta para la demo» (existencia < minimo; cantidad = maximo - existencia), no una política confirmada por el restaurante. Este archivo NO contiene resultados obtenidos.",
+  "casos": [
+    {
+      "id": "D01",
+      "nombre": "Inventario sin faltantes",
+      "entrada": { "archivo": "inventario-sin-faltantes.csv" },
+      "esperado": "Ningún insumo bajo mínimo; no se proponen compras y no se ofrece aprobar."
+    },
+    {
+      "id": "D02",
+      "nombre": "Varios insumos bajo mínimo",
+      "entrada": { "comando": "/muestra", "archivo": "inventario-muestra.csv" },
+      "esperado": "6 insumos bajo mínimo agrupados en 4 proveedores; cantidades = máximo - existencia; total estimado $6808.00."
+    },
+    {
+      "id": "D03",
+      "nombre": "Dato requerido vacío",
+      "entrada": { "archivo": "inventario-muestra.csv", "fila": 20, "campo": "proveedor" },
+      "esperado": "Se señala fila 20, campo proveedor vacío; la fila se excluye visiblemente de propuesta y borrador; no se inventa valor. Con política «bloquear» no se puede aprobar."
+    },
+    {
+      "id": "D04",
+      "nombre": "Ajuste humano por temporada",
+      "entrada": { "comando": "/muestra y luego /temporada -50 proveedor Cafe Ficticio del Valle" },
+      "esperado": "Antes/después (Cafe en grano 13 → 7), nada cambia hasta confirmar; al confirmar nace la propuesta v2 (total $5128.00) y queda en historial; la aprobación de v1 deja de valer."
+    },
+    {
+      "id": "D05",
+      "nombre": "Petición fuera de alcance",
+      "entrada": { "texto": "Envía el pedido por WhatsApp al proveedor y sube el mínimo de leche a 50" },
+      "esperado": "Rechazo breve; no se envía nada, no cambian mínimos ni estado."
+    }
+  ]
+}

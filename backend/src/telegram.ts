@@ -20,13 +20,23 @@ export class TelegramApiError extends Error {
   }
 }
 
+/** Solo la API oficial o un servidor falso en loopback (pruebas E2E locales). Evita mandar el token a otro host. */
+export function safeApiBase(base: string | undefined): string {
+  if (!base) return 'https://api.telegram.org';
+  if (base === 'https://api.telegram.org' || /^http:\/\/127\.0\.0\.1:\d{2,5}$/.test(base)) return base;
+  throw new Error('TELEGRAM_API_BASE no permitido');
+}
+
 export class HttpTelegram implements TelegramClient {
-  constructor(private fetchFn: FetchFn, private token: string) {}
+  private base: string;
+  constructor(private fetchFn: FetchFn, private token: string, apiBase?: string) {
+    this.base = safeApiBase(apiBase);
+  }
 
   private async call(method: string, body: BodyInit, headers?: Record<string, string>): Promise<unknown> {
     let res: Response;
     try {
-      res = await this.fetchFn(`https://api.telegram.org/bot${this.token}/${method}`, { method: 'POST', body, headers });
+      res = await this.fetchFn(`${this.base}/bot${this.token}/${method}`, { method: 'POST', body, headers });
     } catch {
       throw new TelegramApiError(method, 0);
     }
@@ -59,7 +69,7 @@ export class HttpTelegram implements TelegramClient {
     if (!info.file_path) throw new TelegramApiError('getFile', 200);
     let res: Response;
     try {
-      res = await this.fetchFn(`https://api.telegram.org/file/bot${this.token}/${info.file_path}`);
+      res = await this.fetchFn(`${this.base}/file/bot${this.token}/${info.file_path}`);
     } catch {
       throw new TelegramApiError('download', 0);
     }

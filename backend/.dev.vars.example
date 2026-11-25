@@ -1,0 +1,8 @@
+# Copia este archivo a .dev.vars (ignorado por git) y llena los valores. Nunca subas .dev.vars.
+TELEGRAM_BOT_TOKEN=
+OPENAI_API_KEY=
+WEBHOOK_SECRET=
+OPENAI_MODEL=gpt-6-luna
+OPENAI_REASONING_EFFORT=low
+DEMO_UNTIL=2026-12-10
+MAX_AI_CALLS_TOTAL=1000
