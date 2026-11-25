@@ -2,6 +2,10 @@
 
 Bot de Telegram de demostración para el reabastecimiento de un restaurante, hecho como proyecto escolar. Revisa un inventario **100 % ficticio** contra mínimos, propone un pedido agrupado por proveedor y genera un borrador descargable del mensaje. Una persona ajusta por temporada, aprueba y es quien enviaría el pedido: **el bot nunca envía pedidos**.
 
+<img src="docs/capturas/02-propuesta-v1.jpg" alt="Captura real del chat con el bot: propuesta v1 por proveedor con total $6808.00 y botones Aprobar y Rechazar" width="380">
+
+*Captura real del recorrido en vivo (2026-11-25): propuesta por proveedor con botones. Más capturas en [docs/ENTREGA.md](docs/ENTREGA.md#capturas-del-recorrido-en-vivo).*
+
 - Bot de la demo: [t.me/mesondemobot](https://t.me/mesondemobot). Solo responde durante las sesiones de demostración (hasta el 10 de diciembre de 2026), mientras corre en el equipo de la persona responsable. Fuera de ellas el chat abre, pero no hay respuesta.
 - Página explicativa: [alambritodito.github.io/meson-reabasto-bot](https://alambritodito.github.io/meson-reabasto-bot/) (código en `site/`, publicada con GitHub Pages).
 - Índice de entrega: [`docs/ENTREGA.md`](docs/ENTREGA.md) (equipo, entregables y cómo ejecutarlo).

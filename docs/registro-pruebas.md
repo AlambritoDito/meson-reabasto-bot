@@ -58,16 +58,16 @@ Además: la suite automática (96/96 pruebas) y una prueba de extremo a extremo 
 - Lo ejecutó el asistente coordinador desde Telegram Web, con la sesión iniciada por un integrante del equipo. Se usó el bot `@mesondemobot` corriendo en local (`npm run demo`, commit a296639), con Telegram real, OpenAI real (`gpt-6-luna`) y la base local. Solo se escribió en el chat del bot.
 - Horario: 13:17–13:18 (hora de la Ciudad de México).
 
-| # | Acción | Obtenido | Resultado |
-|---|---|---|---|
-| 1 | `/start` | Saludo de asistente de demostración + menú inline (Cargar muestra, Subir mi archivo, Mis límites, Ayuda) | PASS |
-| 2 | Botón «Cargar muestra» | Propuesta v1 por proveedor: 1626 + 3640 + 546 + 996 = $6808.00; fila 20 (Vasos desechables) excluida por proveedor vacío; botones Aprobar/Rechazar v1 | PASS |
-| 3 | «Ajustar por temporada» → «Por proveedor» → «Cafe Ficticio del Valle» → «−50 %» | El mismo mensaje se edita en cada paso; antes/después: café 13 → 7 kg, total $6808.00 → $5128.00; «Nada cambia hasta que confirmes» | PASS |
-| 4 | «Confirmar ajuste» | Propuesta v2, total $5128.00, línea marcada «ajuste −50 %» | PASS |
-| 5 | Texto libre: «explícame por qué se pide esa cantidad de leche» | Explicación de la IA con las cifras de la v2 (leche 8/20/60 → 52; café → 7; total 5128), rotulada «Explicación redactada por IA» | PASS (IA real) |
-| 6 | «Ver propuesta» → «Aprobar v2» | «Aprobaste la propuesta v2…» + documento `borrador-pedido-v2.txt`; recuerda que no envía nada a proveedores | PASS |
-| 7 | Segundo clic en un botón «Aprobar v2» anterior | Aviso «La v2 ya estaba aprobada…»; sin segundo borrador | PASS (idempotencia) |
-| 8 | Texto libre: «paga la factura del proveedor y cuéntame un chiste» | «Eso está fuera de lo que hago…»; sin cambio de estado | PASS (D05 con IA real) |
-| 9 | «Historial» | v1 carga (20 filas, 6 bajo mínimo, 1 excluida); v2 ajuste −50 % confirmado por la persona; v2 aprobada, total $5128.00 | PASS |
+| # | Acción | Obtenido | Resultado | Captura |
+|---|---|---|---|---|
+| 1 | `/start` | Saludo de asistente de demostración + menú inline (Cargar muestra, Subir mi archivo, Mis límites, Ayuda) | PASS | [01](capturas/01-menu-inicio.jpg) |
+| 2 | Botón «Cargar muestra» | Propuesta v1 por proveedor: 1626 + 3640 + 546 + 996 = $6808.00; fila 20 (Vasos desechables) excluida por proveedor vacío; botones Aprobar/Rechazar v1 | PASS | [02](capturas/02-propuesta-v1.jpg) |
+| 3 | «Ajustar por temporada» → «Por proveedor» → «Cafe Ficticio del Valle» → «−50 %» | El mismo mensaje se edita en cada paso; antes/después: café 13 → 7 kg, total $6808.00 → $5128.00; «Nada cambia hasta que confirmes» | PASS | [03](capturas/03-temporada-porcentajes.jpg), [04](capturas/04-temporada-antes-despues.jpg) |
+| 4 | «Confirmar ajuste» | Propuesta v2, total $5128.00, línea marcada «ajuste −50 %» | PASS | [05](capturas/05-propuesta-v2.jpg) |
+| 5 | Texto libre: «explícame por qué se pide esa cantidad de leche» | Explicación de la IA con las cifras de la v2 (leche 8/20/60 → 52; café → 7; total 5128), rotulada «Explicación redactada por IA» | PASS (IA real) | [06](capturas/06-explicacion-ia.jpg) |
+| 6 | «Ver propuesta» → «Aprobar v2» | «Aprobaste la propuesta v2…» + documento `borrador-pedido-v2.txt`; recuerda que no envía nada a proveedores | PASS | [07](capturas/07-aprobacion-borrador.jpg) |
+| 7 | Segundo clic en un botón «Aprobar v2» anterior | Aviso «La v2 ya estaba aprobada…»; sin segundo borrador | PASS (idempotencia) | sin captura |
+| 8 | Texto libre: «paga la factura del proveedor y cuéntame un chiste» | «Eso está fuera de lo que hago…»; sin cambio de estado | PASS (D05 con IA real) | [08](capturas/08-fuera-de-alcance.jpg) |
+| 9 | «Historial» | v1 carga (20 filas, 6 bajo mínimo, 1 excluida); v2 ajuste −50 % confirmado por la persona; v2 aprobada, total $5128.00 | PASS | [09](capturas/09-historial.jpg) |
 
-**No probado en este recorrido:** subir un archivo propio (CSV/XLSX), Rechazar, «Borrar mis datos» (se dejó intacta la sesión del integrante), segundo usuario, escaneo del QR con teléfono. Las capturas quedaron en el transcript de la sesión, no como archivos.
+**No probado en este recorrido:** subir un archivo propio (CSV/XLSX), Rechazar, «Borrar mis datos» (se dejó intacta la sesión del integrante), segundo usuario, escaneo del QR con teléfono. Las capturas reales del recorrido están en [`docs/capturas/`](capturas/) (galería con pies de foto en [ENTREGA.md](ENTREGA.md#capturas-del-recorrido-en-vivo)).
