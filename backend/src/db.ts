@@ -19,6 +19,7 @@ export interface Session {
   adjustments: Adjustments;
   version: number;
   approvedVersion: number | null;
+  rejectedVersion: number | null;
   pendingAdjust: PendingAdjust | null;
   updatedAt: number;
 }
@@ -31,6 +32,7 @@ interface SessionRow {
   adjustments_json: string;
   version: number;
   approved_version: number | null;
+  rejected_version: number | null;
   pending_adjust_json: string | null;
   updated_at: number;
 }
@@ -72,6 +74,7 @@ export class Store {
       adjustments: JSON.parse(r.adjustments_json),
       version: r.version,
       approvedVersion: r.approved_version,
+      rejectedVersion: r.rejected_version ?? null,
       pendingAdjust: r.pending_adjust_json ? JSON.parse(r.pending_adjust_json) : null,
       updatedAt: r.updated_at,
     };
@@ -86,7 +89,7 @@ export class Store {
            VALUES (?, ?, ?, ?, ?, 1, NULL, NULL, ?, ?)
            ON CONFLICT(chat_id) DO UPDATE SET session_id = excluded.session_id, source = excluded.source,
              validation_json = excluded.validation_json, adjustments_json = excluded.adjustments_json, version = 1,
-             approved_version = NULL, pending_adjust_json = NULL, created_at = excluded.created_at, updated_at = excluded.updated_at`,
+             approved_version = NULL, rejected_version = NULL, pending_adjust_json = NULL, created_at = excluded.created_at, updated_at = excluded.updated_at`,
         )
         .bind(chatId, sessionId, source, JSON.stringify(validation), JSON.stringify(adjustments), t, t),
       this.db.prepare('DELETE FROM history WHERE chat_id = ?').bind(chatId),
@@ -105,7 +108,7 @@ export class Store {
   async applyPendingAdjust(chatId: number, sessionId: string, baseVersion: number, nonce: string, next: Adjustments): Promise<boolean> {
     const r = await this.db
       .prepare(
-        `UPDATE sessions SET adjustments_json = ?, version = version + 1, approved_version = NULL, pending_adjust_json = NULL, updated_at = ?
+        `UPDATE sessions SET adjustments_json = ?, version = version + 1, approved_version = NULL, rejected_version = NULL, pending_adjust_json = NULL, updated_at = ?
          WHERE chat_id = ? AND session_id = ? AND version = ? AND json_extract(pending_adjust_json, '$.id') = ?`,
       )
       .bind(JSON.stringify(next), this.now(), chatId, sessionId, baseVersion, nonce)
@@ -116,7 +119,16 @@ export class Store {
   /** Aprueba la versión vigente una sola vez. true solo en la primera aprobación efectiva. */
   async approve(chatId: number, sessionId: string, version: number): Promise<boolean> {
     const r = await this.db
-      .prepare('UPDATE sessions SET approved_version = version, updated_at = ? WHERE chat_id = ? AND session_id = ? AND version = ? AND approved_version IS NULL')
+      .prepare('UPDATE sessions SET approved_version = version, updated_at = ? WHERE chat_id = ? AND session_id = ? AND version = ? AND approved_version IS NULL AND rejected_version IS NULL')
+      .bind(this.now(), chatId, sessionId, version)
+      .run();
+    return r.meta.changes === 1;
+  }
+
+  /** Rechaza la versión vigente una sola vez (si no está aprobada ni rechazada). */
+  async reject(chatId: number, sessionId: string, version: number): Promise<boolean> {
+    const r = await this.db
+      .prepare('UPDATE sessions SET rejected_version = version, pending_adjust_json = NULL, updated_at = ? WHERE chat_id = ? AND session_id = ? AND version = ? AND approved_version IS NULL AND rejected_version IS NULL')
       .bind(this.now(), chatId, sessionId, version)
       .run();
     return r.meta.changes === 1;
@@ -138,6 +150,7 @@ export class Store {
   // ---- contadores atómicos ----
   /** Reserva 1 unidad si count < limit. Atómico en una sola sentencia. */
   async reserve(key: string, limit: number, ttlMs: number): Promise<boolean> {
+    if (!(limit > 0)) return false; // límite 0 (o inválido) no permite ninguna unidad
     const t = this.now();
     const row = await this.db
       .prepare(

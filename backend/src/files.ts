@@ -1,6 +1,6 @@
 // Validación de archivos subidos: extensión, tamaño, contenido real y defensa contra ZIP expansivo antes de parsear.
 import * as XLSX from 'xlsx';
-import { LIMITS } from './config';
+import { LIMITS, DEFAULT_RULE } from './config';
 import { parseCsv, type Table } from './csv';
 
 export type FileResult = { ok: true; table: Table; kind: 'csv' | 'xlsx' } | { ok: false; error: string };
@@ -62,7 +62,7 @@ function decodeUtf8Strict(b: Uint8Array): string | null {
   }
 }
 
-export function parseUpload(fileName: string, bytes: Uint8Array): FileResult {
+export function parseUpload(fileName: string, bytes: Uint8Array, maxRows: number = DEFAULT_RULE.maxFilas): FileResult {
   if (bytes.length === 0) return { ok: false, error: 'El archivo está vacío.' };
   if (bytes.length > LIMITS.maxFileBytes) return { ok: false, error: 'El archivo supera 200 KB.' };
   const ext = extensionOf(fileName);
@@ -78,10 +78,17 @@ export function parseUpload(fileName: string, bytes: Uint8Array): FileResult {
     if (!z.ok) return z;
     if (!z.names.includes('xl/workbook.xml')) return { ok: false, error: 'El archivo no es un libro XLSX válido.' };
     try {
-      const wb = XLSX.read(bytes, { type: 'array', cellFormula: false, cellHTML: false, cellText: false, sheets: 0, dense: true });
+      // sheetRows limita lo que SheetJS materializa; !fullref conserva el rango declarado original.
+      const wb = XLSX.read(bytes, { type: 'array', cellFormula: false, cellHTML: false, cellText: false, sheets: 0, dense: true, sheetRows: maxRows + 2 });
       const first = wb.SheetNames[0];
       const ws = first ? wb.Sheets[first] : undefined;
       if (!ws) return { ok: false, error: 'El XLSX no tiene hojas.' };
+      const ref = (ws['!fullref'] as string | undefined) ?? (ws['!ref'] as string | undefined);
+      if (ref) {
+        const r = XLSX.utils.decode_range(ref);
+        if (r.e.c - r.s.c + 1 > LIMITS.maxSheetCols) return { ok: false, error: `La hoja usa más de ${LIMITS.maxSheetCols} columnas. Deja solo las columnas del inventario o usa CSV.` };
+        if (r.e.r + 1 > maxRows + 1) return { ok: false, error: `El archivo tiene más de ${maxRows} filas (o celdas lejanas con contenido). Limpia la hoja o usa CSV.` };
+      }
       const raw = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: true, defval: '', blankrows: true });
       // Solo valores cacheados (no fórmulas). Números se pasan como texto con punto decimal.
       const rows = raw.map((r) => (Array.isArray(r) ? r.map((v) => (v === null || v === undefined ? '' : typeof v === 'number' ? String(v) : String(v))) : []));

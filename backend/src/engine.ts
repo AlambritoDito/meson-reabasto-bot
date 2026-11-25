@@ -110,7 +110,9 @@ export function validateInventory(table: Table, rule: RuleConfig): Validation {
   }
   const missing = REQUIRED.filter((c) => idx[c] === undefined);
   if (missing.length) return { ...out, fatal: `Faltan columnas: ${missing.join(', ')}.` };
-  const extra = header.filter((h) => h !== '' && !(REQUIRED as readonly string[]).includes(h));
+  const dupCols = [...new Set(header.filter((h, i) => h !== '' && header.indexOf(h) !== i))];
+  if (dupCols.length) out.warnings.push(`Columnas duplicadas: ${dupCols.join(', ')} (uso la primera de cada una).`);
+  const extra = [...new Set(header.filter((h) => h !== '' && !(REQUIRED as readonly string[]).includes(h)))];
   if (extra.length) out.warnings.push(`Columnas ignoradas: ${extra.join(', ')}.`);
 
   const dataRows = table.rows.slice(1);
@@ -211,12 +213,14 @@ export function buildProposal(v: Validation, rule: RuleConfig, adj: Adjustments)
     const cantidad = Math.max(0, Math.min(ajustada, tope));
     lines.push({ ...r, base, pctAplicado: pct, cantidad, subtotal: round2(cantidad * r.costo) });
   }
+  // Agrupa por proveedor normalizado (igual que el ajuste por temporada); muestra la primera grafía.
   const map = new Map<string, Group>();
   for (const l of lines) {
-    const g = map.get(l.proveedor) ?? { proveedor: l.proveedor, lines: [], subtotal: 0 };
+    const key = normalizeKey(l.proveedor);
+    const g = map.get(key) ?? { proveedor: l.proveedor, lines: [], subtotal: 0 };
     g.lines.push(l);
     g.subtotal = round2(g.subtotal + l.subtotal);
-    map.set(l.proveedor, g);
+    map.set(key, g);
   }
   const groups = [...map.values()];
   return {

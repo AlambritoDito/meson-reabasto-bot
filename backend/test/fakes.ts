@@ -1,6 +1,6 @@
 // DOBLES DE PRUEBA. Nada aquí acredita una llamada real a Telegram, OpenAI o D1 remoto.
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import type { D1Database, D1PreparedStatement, D1Result, Env } from '../src/types';
 import type { TelegramClient, Keyboard } from '../src/telegram';
 import type { LlmClient } from '../src/llm';
@@ -10,7 +10,8 @@ import { handleRequest } from '../src/index';
 export class FakeD1 implements D1Database {
   db = new DatabaseSync(':memory:');
   constructor() {
-    this.db.exec(readFileSync(new URL('../migrations/0001_init.sql', import.meta.url), 'utf8'));
+    const dir = new URL('../migrations/', import.meta.url);
+    for (const f of readdirSync(dir).filter((x) => x.endsWith('.sql')).sort()) this.db.exec(readFileSync(new URL(f, dir), 'utf8'));
   }
   prepare(sql: string): D1PreparedStatement {
     const self = this;

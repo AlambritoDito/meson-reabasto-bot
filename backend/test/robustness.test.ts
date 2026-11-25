@@ -19,6 +19,20 @@ function xlsxBytes(aoa: unknown[][], formulaCell = false): Uint8Array {
   return new Uint8Array(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
 }
 
+/** XLSX pequeño parcheado a mano: añade una celda lejana al XML de la hoja (escribirlo con SheetJS recorrería todo el rango). */
+function farCellXlsx(cell: string): Uint8Array {
+  const base = xlsxBytes([['insumo', 'unidad', 'existencia', 'minimo', 'maximo', 'proveedor', 'costo'], ['A', 'kg', 1, 5, 10, 'P', 1]]);
+  const cfb = XLSX.CFB.read(base, { type: 'array' });
+  const idx = cfb.FullPaths.findIndex((f) => f.endsWith('xl/worksheets/sheet1.xml'));
+  const entry = cfb.FileIndex[idx];
+  let xml = new TextDecoder().decode(entry.content as Uint8Array);
+  const row = cell.replace(/^[A-Z]+/, '');
+  xml = xml.replace(/<dimension ref="[^"]*"\/>/, `<dimension ref="A1:${cell}"/>`).replace('</sheetData>', `<row r="${row}"><c r="${cell}" t="inlineStr"><is><t>x</t></is></c></row></sheetData>`);
+  entry.content = new TextEncoder().encode(xml) as unknown as typeof entry.content;
+  entry.size = (entry.content as Uint8Array).length;
+  return new Uint8Array(XLSX.CFB.write(cfb, { type: 'array', fileType: 'zip' }) as ArrayBuffer);
+}
+
 /** ZIP mínimo cuyo directorio central declara una expansión enorme (bomba). */
 function zipBomb(): Uint8Array {
   const name = new TextEncoder().encode('xl/workbook.xml');
@@ -105,7 +119,8 @@ describe('webhook: autenticación, health e idempotencia', () => {
     const r = await app.post(u);
     expect(r.status).toBe(200);
     expect(await r.json()).toMatchObject({ gaveUp: true });
-    expect(app.tg.last('message')!.text).toMatch(/prueba con un CSV/);
+    expect(app.tg.last('message')!.text).toMatch(/tras varios intentos/);
+    expect(app.tg.last('message')!.text).not.toMatch(/XLSX|CSV/); // BAJA 7: no culpa a XLSX si no lo era
   });
 });
 
@@ -302,5 +317,113 @@ describe('TELEGRAM_API_BASE', () => {
     expect(safeApiBase('http://127.0.0.1:9000')).toBe('http://127.0.0.1:9000');
     expect(() => safeApiBase('https://evil.example')).toThrow();
     expect(() => safeApiBase('http://127.0.0.1.evil.example:80')).toThrow();
+  });
+});
+
+describe('correcciones de la revisión independiente', () => {
+  const total = (app: ReturnType<typeof makeApp>) => (app.db.db.prepare("SELECT count FROM counters WHERE key = 'ai:total'").get() as { count: number } | undefined)?.count ?? 0;
+  const glob = (app: ReturnType<typeof makeApp>) => (app.db.db.prepare("SELECT count FROM counters WHERE key LIKE 'ai:global:%'").get() as { count: number } | undefined)?.count ?? 0;
+
+  it('MEDIA 3: rechazos por minuto no consumen el tope total ni el global', async () => {
+    const app = makeApp();
+    for (let i = 0; i < 3; i++) app.llm.queue.push(JSON.stringify({ intent: 'ayuda', pct: null, alcance: null, objetivo: null }));
+    for (let i = 0; i < 10; i++) await app.msg(A, 'hola');
+    expect(app.llm.calls).toHaveLength(3);
+    expect(total(app)).toBe(3);
+    expect(glob(app)).toBe(3);
+  });
+  it('MEDIA 3: rechazo por tope total libera minuto/día/global', async () => {
+    const app = makeApp({ maxTotal: '1' });
+    app.llm.queue.push(JSON.stringify({ intent: 'ayuda', pct: null, alcance: null, objetivo: null }));
+    await app.msg(A, 'hola');
+    await app.msg(B, 'hola');
+    expect(app.llm.calls).toHaveLength(1);
+    expect(glob(app)).toBe(1);
+    expect(app.db.db.prepare('SELECT count FROM counters WHERE key LIKE ?').get(`ai:day:${B}:%`)).toEqual({ count: 0 });
+  });
+  it('BAJA 5: MAX_AI_CALLS_TOTAL=0 no permite ninguna llamada', async () => {
+    const app = makeApp({ maxTotal: '0' });
+    app.llm.queue.push(JSON.stringify({ intent: 'ayuda', pct: null, alcance: null, objetivo: null }));
+    await app.msg(A, 'hola');
+    expect(app.llm.calls).toHaveLength(0);
+    expect(app.tg.last('message')!.text).toMatch(/total de la demo/);
+  });
+
+  it('ALTA 2: XLSX con una celda en XFD1048576 se rechaza rápido sin materializar millones de filas', async () => {
+    const bytes = farCellXlsx('XFD1048576');
+    expect(bytes.length).toBeLessThan(LIMITS.maxFileBytes);
+    const app = makeApp();
+    const t0 = Date.now();
+    await app.doc(A, 'lejana.xlsx', bytes);
+    expect(Date.now() - t0).toBeLessThan(3000);
+    expect(app.tg.last('message')!.text).toMatch(/más de 50 columnas/);
+    expect(app.db.count('sessions')).toBe(0);
+  }, 10_000);
+  it('ALTA 2: XLSX con celda lejana en filas (A1048576) se rechaza por filas', async () => {
+    const app = makeApp();
+    const t0 = Date.now();
+    await app.doc(A, 'filas.xlsx', farCellXlsx('A1048576'));
+    expect(Date.now() - t0).toBeLessThan(3000);
+    expect(app.tg.last('message')!.text).toMatch(/más de 500 filas/);
+  }, 10_000);
+  it('ALTA 2: ZIP cuyo tamaño declarado difiere del real no rompe ni crea sesión inválida', async () => {
+    const good = xlsxBytes([['insumo', 'unidad', 'existencia', 'minimo', 'maximo', 'proveedor', 'costo'], ['A', 'kg', 1, 5, 10, 'P', 1]]);
+    const b = new Uint8Array(good);
+    const dv = new DataView(b.buffer);
+    // Falsea el tamaño descomprimido declarado (directorio central) de cada entrada a 1 byte.
+    let eocd = b.length - 22;
+    while (dv.getUint32(eocd, true) !== 0x06054b50) eocd--;
+    let p = dv.getUint32(eocd + 16, true);
+    for (let k = 0; k < dv.getUint16(eocd + 10, true); k++) {
+      dv.setUint32(p + 24, 1, true);
+      p += 46 + dv.getUint16(p + 28, true) + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+    }
+    const app = makeApp();
+    const r = await app.doc(A, 'mentira.xlsx', b);
+    expect(r.status).toBe(200);
+    const t = app.tg.last('message')!.text;
+    // O se rechaza con mensaje claro, o se lee acotado igual que el original (1 insumo); nunca error mudo.
+    expect(/No pude leer el XLSX|1 insumos|insumos/.test(t)).toBe(true);
+  });
+
+  it('BAJA 6: agrupa por proveedor normalizado y avisa columnas duplicadas', async () => {
+    const { parseCsv } = await import('../src/csv');
+    const { validateInventory, buildProposal, emptyAdjustments } = await import('../src/engine');
+    const { DEFAULT_RULE } = await import('../src/config');
+    const v = validateInventory(parseCsv('insumo,unidad,existencia,minimo,maximo,proveedor,costo,costo\nA,kg,1,5,10,Proveedor Uno,1,9\nB,kg,1,5,10,proveedor  uno ,2,9\n'), DEFAULT_RULE);
+    expect(v.warnings.join(' ')).toMatch(/Columnas duplicadas: costo/);
+    const p = buildProposal(v, DEFAULT_RULE, emptyAdjustments());
+    expect(p.groups).toHaveLength(1);
+    expect(p.groups[0]).toMatchObject({ proveedor: 'Proveedor Uno', subtotal: 27 });
+  });
+  it('BAJA 6: numbersGrounded acepta separador de miles y sigue rechazando cifras inventadas', async () => {
+    const { numbersGrounded } = await import('../src/ai');
+    expect(numbersGrounded('Total estimado $6,808.00 y $1,626.00 de lácteos', { total: 6808, s: 1626 })).toBe(true);
+    expect(numbersGrounded('Total $7,000.00', { total: 6808 })).toBe(false);
+    expect(numbersGrounded('Pide 22,5 litros', { costo: 22.5 })).toBe(true);
+  });
+});
+
+describe('poller y stop (revisión)', () => {
+  it('ALTA 2: timeout del reenvío al Worker: no avanza offset, registra y la vuelta termina', async () => {
+    // @ts-expect-error módulo JS sin tipos
+    const { pollOnce } = await import('../scripts/poll.mjs');
+    const logs: string[] = [];
+    const fetchFn = (url: string, init: RequestInit) => {
+      if (url.includes('getUpdates')) return Promise.resolve(new Response(JSON.stringify({ ok: true, result: [{ update_id: 40 }] })));
+      return new Promise<Response>((_r, rej) => init.signal!.addEventListener('abort', () => rej(new Error('abort'))));
+    };
+    const r = await pollOnce({ fetchFn, token: 'T', workerUrl: 'http://127.0.0.1:1/tg', secret: 's', offset: 40, forwardTimeoutMs: 50, log: (m: string) => logs.push(m) });
+    expect(r).toMatchObject({ offset: 40, failed: true });
+    expect(logs.join(' ')).toMatch(/no respondió en 0.05s; no se confirma/);
+  });
+  it('BAJA 8: stop solo reconoce procesos de la demo', async () => {
+    // @ts-expect-error módulo JS sin tipos
+    const { isDemoProcess } = await import('../scripts/stop.mjs');
+    expect(isDemoProcess('node scripts/demo.mjs', 'demo')).toBe(true);
+    expect(isDemoProcess('/Users/x/backend/node_modules/.bin/wrangler dev --local --port 8787', 'wrangler')).toBe(true);
+    expect(isDemoProcess('/Applications/Safari.app/Contents/MacOS/Safari', 'demo')).toBe(false);
+    expect(isDemoProcess('node otra-cosa.mjs', 'wrangler')).toBe(false);
+    expect(isDemoProcess('', 'demo')).toBe(false);
   });
 });

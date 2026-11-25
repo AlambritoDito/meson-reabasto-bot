@@ -150,10 +150,50 @@ describe('casos docentes D01–D05 (dobles de prueba)', () => {
     app.llm.queue.push(JSON.stringify({ intent: 'temporada', pct: 20, alcance: 'insumo', objetivo: 'cafe en grano' }));
     await app.msg(A, 'semana de exámenes, sube el café 20%');
     const pv = app.tg.last('message')!;
-    expect(pv.text).toMatch(/Antes → después/);
-    expect(pv.text).toMatch(/Cafe en grano: 13 → 13/.test(pv.text) ? /tope/ : /Cafe en grano/);
+    // +20 % sobre 13 kg = 15.6 → 16, pero el tope máximo − existencia es 13: no cambia nada y se dice.
+    expect(pv.text).toBe(
+      [
+        'Ajuste por temporada propuesto: +20 % a insumo Cafe en grano.',
+        'Algunas cantidades quedaron topadas para no superar el máximo.',
+        '',
+        'Antes → después:',
+        '• Ninguna cantidad cambia (topes por máximo o sin insumos afectados).',
+        '',
+        'Total: $6808.00 → $6808.00',
+        'Nada cambia hasta que confirmes.',
+      ].join('\n'),
+    );
     expect(pv.keyboard![0][0].text).toBe('Confirmar ajuste');
     expect((app.db.db.prepare('SELECT version FROM sessions').get() as { version: number }).version).toBe(1);
+  });
+
+  it('D04b ajuste a la baja (-20 % global) SÍ cambia cantidades: antes/después exacto y v2 tras confirmar', async () => {
+    const app = makeApp();
+    await loadMuestra(app);
+    await app.msg(A, '/temporada -20');
+    const pv = app.tg.last('message')!;
+    expect(pv.text).toBe(
+      [
+        'Ajuste por temporada propuesto: -20 % a todos los insumos.',
+        '',
+        'Antes → después:',
+        '• Leche entera: 52 → 42 litro (tope 52)',
+        '• Yogur natural: 12 → 10 litro (tope 12)',
+        '• Cafe en grano: 13 → 11 kg (tope 13)',
+        '• Arroz: 21 → 17 kg (tope 21)',
+        '• Jitomate: 17 → 14 kg (tope 17)',
+        '• Aguacate: 8 → 7 kg (tope 8)',
+        '',
+        'Total: $6808.00 → $5694.00',
+        'Nada cambia hasta que confirmes.',
+      ].join('\n'),
+    );
+    expect((app.db.db.prepare('SELECT version FROM sessions').get() as { version: number }).version).toBe(1);
+    await app.click(A, pv.keyboard![0][0].callback_data);
+    const v2 = app.tg.last('message')!.text;
+    expect(v2).toMatch(/propuesta v2/);
+    expect(v2).toMatch(/Leche entera: tiene 8, mín 20, máx 60 → pedir 42 litro \(ajuste -20 %\)/);
+    expect(v2).toMatch(/Total estimado: \$5694\.00/);
   });
 
   it('D05 fuera de alcance: rechazo breve sin cambiar estado', async () => {
@@ -215,6 +255,27 @@ describe('IA: salida inválida, fallo y contenido hostil (doble de prueba de Ope
     expect(app.tg.last('message')!.text).toMatch(/^\(sin IA\) La demo alcanzó su tope de gasto de IA/);
   });
 
+  it('ALTA 1: texto libre «explicar» reserva cada llamada real (llamadas del doble == contadores)', async () => {
+    const app = makeApp();
+    await loadMuestra(app);
+    app.llm.queue.push(JSON.stringify({ intent: 'explicar', pct: null, alcance: null, objetivo: null }));
+    app.llm.queue.push('Se piden 52 litros de leche porque tiene 8 y el máximo es 60.');
+    await app.msg(A, '¿por qué tanta leche?');
+    const c = (k: string) => (app.db.db.prepare('SELECT count FROM counters WHERE key LIKE ?').get(k) as { count: number } | undefined)?.count ?? 0;
+    expect(app.llm.calls).toHaveLength(2);
+    expect(c('ai:day:%')).toBe(2);
+    expect(c('ai:min:%')).toBe(2);
+    expect(c('ai:global:%')).toBe(2);
+    expect(c('ai:total')).toBe(2);
+    // Con 1 de cupo por minuto restante: clasifica (3ª) y la explicación cae a plantilla sin llamar.
+    app.llm.queue.push(JSON.stringify({ intent: 'explicar', pct: null, alcance: null, objetivo: null }));
+    await app.msg(A, 'explícame otra vez');
+    expect(app.llm.calls).toHaveLength(3);
+    expect(c('ai:min:%')).toBe(3);
+    expect(c('ai:total')).toBe(3);
+    expect(app.tg.last('message')!.text).toMatch(/^\(sin IA\) 6 insumos/);
+  });
+
   it('/explicar acepta texto de IA con cifras correctas y rechaza cifras inventadas', async () => {
     const app = makeApp();
     await loadMuestra(app);
@@ -241,5 +302,48 @@ describe('IA: salida inválida, fallo y contenido hostil (doble de prueba de Ope
     expect(draft).toMatch(/• '@SUM/);
     expect(draft).toMatch(/PARA: '-2\+3 Ficticio/);
     expect(draft.split('\n').some((l) => /^[=+\-@]/.test(l))).toBe(false);
+  });
+});
+
+describe('Rechazar propuesta (hoja del equipo: aprobar o rechazar pedidos)', () => {
+  it('rechazo con versión: historial, sin borrador, idempotente; no se puede aprobar después; nueva propuesta posible', async () => {
+    const app = makeApp();
+    await loadMuestra(app);
+    const kb = app.tg.last('message')!.keyboard![0];
+    expect(kb.map((b) => b.text)).toEqual(['Aprobar v1', 'Rechazar v1']);
+    const [ap1, rj1] = kb.map((b) => b.callback_data);
+    expect(rj1).toMatch(/^rj:[0-9a-f]{8}:1$/);
+    await app.click(A, rj1);
+    expect(app.tg.last('message')!.text).toMatch(/Rechazaste la propuesta v1\. No genero borrador/);
+    await app.click(A, rj1);
+    expect(app.tg.last('callback')!.text).toMatch(/ya estaba rechazada/);
+    await app.click(A, ap1);
+    expect(app.tg.last('callback')!.text).toMatch(/ya fue rechazada/);
+    expect(app.tg.sent.filter((s) => s.kind === 'document')).toHaveLength(0);
+    expect(app.db.db.prepare("SELECT COUNT(*) n FROM history WHERE kind = 'rechazada'").get()).toEqual({ n: 1 });
+    await app.msg(A, '/borrador');
+    expect(app.tg.last('message')!.text).toMatch(/fue rechazada; no hay borrador/);
+    await app.msg(A, '/aprobar');
+    expect(app.tg.last('message')!.text).toMatch(/Rechazaste la propuesta v1/);
+    // Nueva propuesta vía ajuste: v2 se puede aprobar
+    await app.msg(A, '/temporada -10');
+    await app.click(A, app.tg.last('message')!.keyboard![0][0].callback_data);
+    await app.click(A, app.tg.last('message')!.keyboard![0][0].callback_data);
+    expect(app.tg.sent.filter((s) => s.kind === 'document')).toHaveLength(1);
+    await app.msg(A, '/historial');
+    expect(app.tg.last('message')!.text).toMatch(/v1 rechazada[\s\S]*v2 ajuste temporada[\s\S]*v2 aprobada/);
+  });
+  it('no se rechaza una versión aprobada ni una versión vieja, ni desde otro usuario', async () => {
+    const app = makeApp();
+    await loadMuestra(app);
+    const [ap1, rj1] = app.tg.last('message')!.keyboard![0].map((b) => b.callback_data);
+    await app.click(A, rj1, B);
+    expect(app.tg.last('callback')!.text).toMatch(/no permitida/);
+    await app.click(A, ap1);
+    await app.click(A, rj1);
+    expect(app.tg.last('callback')!.text).toMatch(/ya estaba aprobada; no se puede rechazar/);
+    await app.msg(A, '/muestra');
+    await app.click(A, rj1);
+    expect(app.tg.last('callback')!.text).toMatch(/ya no existe/);
   });
 });

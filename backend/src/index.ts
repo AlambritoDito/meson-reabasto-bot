@@ -57,7 +57,8 @@ export async function handleRequest(req: Request, env: Env, o: AppOverrides = {}
     // Error honesto tras reintentos (p. ej. límite de CPU con un XLSX): se cierra el update para no ciclar.
     if (chatId !== undefined && (update.message?.chat.type ?? update.callback_query?.message?.chat.type) === 'private') {
       try {
-        await tg.sendMessage(chatId, 'No pude procesar ese mensaje tras varios intentos. Si era un XLSX, prueba con un CSV más pequeño.');
+        const isXlsx = /\.xlsx$/i.test(update.message?.document?.file_name ?? '');
+        await tg.sendMessage(chatId, `No pude procesar ese mensaje tras varios intentos.${isXlsx ? ' Si puedes, prueba con un CSV más pequeño.' : ' Intenta de nuevo en un momento.'}`);
       } catch {
         /* mejor esfuerzo */
       }

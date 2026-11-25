@@ -87,8 +87,9 @@ export function numbersGrounded(text: string, facts: unknown): boolean {
     allowed.add(Math.abs(Number(m)));
     return m;
   });
-  for (const m of text.match(/\d+(?:[.,]\d+)?/g) ?? []) {
-    const n = Number(m.replace(',', '.'));
+  // Acepta separador de miles («$1,626.00» -> 1626); si no, una coma se lee como decimal.
+  for (const m of text.match(/\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:[.,]\d+)?/g) ?? []) {
+    const n = /^\d{1,3}(,\d{3})+(\.\d+)?$/.test(m) ? Number(m.replace(/,/g, '')) : Number(m.replace(',', '.'));
     if (Number.isInteger(n) && n <= 10) continue;
     if (!allowed.has(n)) return false;
   }

@@ -52,7 +52,7 @@ export async function deleteWebhook(fetchFn, token, base) {
  * Una vuelta: pide updates desde `offset`, los reenvía en orden y devuelve el nuevo offset.
  * Si el Worker no responde 2xx, se detiene y NO avanza más allá de ese update (se reintentará).
  */
-export async function pollOnce({ fetchFn, token, workerUrl, secret, offset, timeoutSec = 50, signal, log = () => {}, base }) {
+export async function pollOnce({ fetchFn, token, workerUrl, secret, offset, timeoutSec = 50, signal, log = () => {}, base, forwardTimeoutMs = 60_000 }) {
   const body = { timeout: timeoutSec, allowed_updates: ['message', 'callback_query'] };
   if (offset !== undefined) body.offset = offset;
   const updates = await tgCall(fetchFn, token, 'getUpdates', body, signal, base);
@@ -60,16 +60,21 @@ export async function pollOnce({ fetchFn, token, workerUrl, secret, offset, time
   let failed = false;
   for (const u of updates) {
     let res;
+    const fwd = new AbortController();
+    const timer = setTimeout(() => fwd.abort(), forwardTimeoutMs);
     try {
       res = await fetchFn(workerUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': secret },
         body: JSON.stringify(u),
+        signal: fwd.signal,
       });
     } catch {
-      log(`update ${u.update_id}: Worker inaccesible; se reintentará`);
+      log(`update ${u.update_id}: ${fwd.signal.aborted ? `el Worker no respondió en ${forwardTimeoutMs / 1000}s` : 'Worker inaccesible'}; no se confirma, se reintentará`);
       failed = true;
       break;
+    } finally {
+      clearTimeout(timer);
     }
     if (res.status < 200 || res.status >= 300) {
       log(`update ${u.update_id}: Worker respondió ${res.status}; se reintentará`);

@@ -32,17 +32,21 @@ export class Quota {
   /** Reserva atómica de una llamada IA en los tres contadores; si uno falla, libera los anteriores. */
   async reserveAi(chatId: number): Promise<{ ok: true } | { ok: false; reason: 'minuto' | 'dia' | 'global' | 'total' }> {
     const k = this.keys(chatId);
-    // Tope total acumulado (freno de gasto): no expira con los días; no se libera aunque falle otro contador.
-    if (!(await this.store.reserve(TOTAL_KEY, this.maxTotal, 100 * 365 * DAY))) return { ok: false, reason: 'total' };
-    if (!(await this.store.reserve(k.global, LIMITS.aiPerDayGlobal, 2 * DAY))) return { ok: false, reason: 'global' };
-    if (!(await this.store.reserve(k.day, LIMITS.aiPerDayPerChat, 2 * DAY))) {
-      await this.store.release(k.global);
-      return { ok: false, reason: 'dia' };
-    }
-    if (!(await this.store.reserve(k.min, LIMITS.aiPerMinutePerChat, 2 * MIN))) {
-      await this.store.release(k.global);
-      await this.store.release(k.day);
-      return { ok: false, reason: 'minuto' };
+    // Orden: minuto, día, global diario y al final el tope total (freno de gasto). Cada rechazo libera lo ya reservado,
+    // así un chat bloqueado por minuto/día no consume el tope total ni el global.
+    const steps: [string, number, number, 'minuto' | 'dia' | 'global' | 'total'][] = [
+      [k.min, LIMITS.aiPerMinutePerChat, 2 * MIN, 'minuto'],
+      [k.day, LIMITS.aiPerDayPerChat, 2 * DAY, 'dia'],
+      [k.global, LIMITS.aiPerDayGlobal, 2 * DAY, 'global'],
+      [TOTAL_KEY, this.maxTotal, 100 * 365 * DAY, 'total'],
+    ];
+    const done: string[] = [];
+    for (const [key, limit, ttl, reason] of steps) {
+      if (!(await this.store.reserve(key, limit, ttl))) {
+        for (const d of done) await this.store.release(d);
+        return { ok: false, reason };
+      }
+      done.push(key);
     }
     return { ok: true };
   }

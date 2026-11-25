@@ -46,6 +46,9 @@ const defaultRandomId = () => {
   return [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
 };
 
+const REJECTED_NEXT = (v: number) =>
+  `Rechazaste la propuesta v${v}. No genero borrador. Para una nueva propuesta: ajusta con /temporada, carga /muestra o sube otro inventario.`;
+
 function aiFailText(e: unknown): string {
   if (e instanceof LlmError && e.kind === 'tope_gasto') return 'La demo alcanzó su tope de gasto de IA; sigo con plantillas.';
   return 'No pude consultar la IA ahora.';
@@ -133,7 +136,7 @@ class Bot {
       case 'muestra':
         return this.say(chatId, 'Para cargar el inventario de ejemplo usa /muestra.');
       case 'explicar':
-        return this.cmdExplicar(chatId, true);
+        return this.cmdExplicar(chatId); // reserva su propia llamada (cada llamada real reserva antes)
       case 'temporada':
         return this.startAdjust(chatId, { scope: intent.alcance ?? 'global', target: intent.objetivo, pct: intent.pct! });
       case 'aprobar':
@@ -173,7 +176,10 @@ class Bot {
 
   async sendProposal(chatId: number, sid: string, version: number, source: string, v: Validation, adj = emptyAdjustments()) {
     const p = buildProposal(v, this.rule, adj);
-    const kb: Keyboard | undefined = p.lines.length && !p.blocked ? [[{ text: `Aprobar propuesta v${version}`, callback_data: `ap:${sid}:${version}` }]] : undefined;
+    const kb: Keyboard | undefined =
+      p.lines.length && !p.blocked
+        ? [[{ text: `Aprobar v${version}`, callback_data: `ap:${sid}:${version}` }, { text: `Rechazar v${version}`, callback_data: `rj:${sid}:${version}` }]]
+        : undefined;
     return this.say(chatId, summaryText(v, p, version, source), kb);
   }
 
@@ -183,16 +189,14 @@ class Bot {
     return s;
   }
 
-  async cmdExplicar(chatId: number, aiAlreadyReserved = false): Promise<void> {
+  async cmdExplicar(chatId: number): Promise<void> {
     const s = await this.requireSession(chatId);
     if (!s) return;
     const p = buildProposal(s.validation, this.rule, s.adjustments);
     const template = () =>
       `${SIN_IA} ${p.lines.length} insumos están bajo su mínimo. Para cada uno, la regla propuesta para la demo pide máximo − existencia${p.lines.some((l) => l.pctAplicado) ? ', con el ajuste de temporada que confirmaste y sin pasar del máximo' : ''}. Total estimado ${fmtMoney(p.total)} en ${p.groups.length} proveedores. ${p.excluded.length ? `${p.excluded.length} filas quedaron fuera por datos inválidos. ` : ''}Tú apruebas; yo no envío nada a proveedores.`;
-    if (!aiAlreadyReserved) {
-      const r = await this.quota.reserveAi(chatId);
-      if (!r.ok) return this.say(chatId, template());
-    }
+    const r = await this.quota.reserveAi(chatId);
+    if (!r.ok) return this.say(chatId, template());
     try {
       const t = await explain(this.d.llm, p);
       return this.say(chatId, t ? `${t}\n\n(Explicación redactada por IA; las cifras oficiales son las de la propuesta.)` : template());
@@ -230,6 +234,7 @@ class Bot {
     const s = await this.requireSession(chatId);
     if (!s) return;
     if (s.approvedVersion === s.version) return this.say(chatId, `La propuesta v${s.version} ya está aprobada. Usa /borrador para descargarla.`);
+    if (s.rejectedVersion === s.version) return this.say(chatId, REJECTED_NEXT(s.version));
     const p = buildProposal(s.validation, this.rule, s.adjustments);
     if (!p.lines.length) return this.say(chatId, 'No hay nada que aprobar: ningún insumo válido está bajo mínimo.');
     if (p.blocked) return this.say(chatId, 'No se puede aprobar: hay filas inválidas y la política es «bloquear».');
@@ -239,6 +244,7 @@ class Bot {
   async cmdBorrador(chatId: number): Promise<void> {
     const s = await this.requireSession(chatId);
     if (!s) return;
+    if (s.rejectedVersion === s.version) return this.say(chatId, `La propuesta v${s.version} fue rechazada; no hay borrador.`);
     if (s.approvedVersion !== s.version) return this.say(chatId, `Aún no apruebas la propuesta vigente (v${s.version}). Usa /aprobar.`);
     return this.sendDraft(s);
   }
@@ -281,6 +287,7 @@ class Bot {
     const data = q.data ?? '';
     let m: RegExpExecArray | null;
     if ((m = /^ap:([0-9a-f]{8}):(\d{1,6})$/.exec(data))) return this.onApprove(q.id, chatId, m[1], Number(m[2]));
+    if ((m = /^rj:([0-9a-f]{8}):(\d{1,6})$/.exec(data))) return this.onReject(q.id, chatId, m[1], Number(m[2]));
     if ((m = /^a([jc]):([0-9a-f]{8})$/.exec(data))) return this.onAdjustDecision(q.id, chatId, m[1] === 'j', m[2]);
     return this.d.tg.answerCallback(q.id, 'Botón no válido.');
   }
@@ -291,12 +298,25 @@ class Bot {
     if (s.version !== version) return this.d.tg.answerCallback(cbId, `Esa es una versión vieja (v${version}). La vigente es v${s.version}.`);
     const p = buildProposal(s.validation, this.rule, s.adjustments);
     if (!p.lines.length || p.blocked) return this.d.tg.answerCallback(cbId, 'Esta propuesta no se puede aprobar.');
+    if (s.rejectedVersion === version) return this.d.tg.answerCallback(cbId, `La v${version} ya fue rechazada; no se puede aprobar.`);
     const first = await this.d.store.approve(chatId, sid, version);
     if (!first) return this.d.tg.answerCallback(cbId, `La v${version} ya estaba aprobada. Usa /borrador.`);
     await this.d.store.addHistory(chatId, sid, version, 'aprobada', `propuesta v${version} aprobada por la persona del chat; total ${fmtMoney(p.total)}`);
     await this.d.tg.answerCallback(cbId, `Propuesta v${version} aprobada.`);
     await this.say(chatId, `Aprobaste la propuesta v${version}. Te envío el borrador. Recuerda: yo no envío nada a proveedores; tú decides si lo mandas.`);
     return this.sendDraft({ ...s, approvedVersion: version });
+  }
+
+  async onReject(cbId: string, chatId: number, sid: string, version: number): Promise<void> {
+    const s = await this.d.store.getSession(chatId);
+    if (!s || s.sessionId !== sid) return this.d.tg.answerCallback(cbId, 'Esa propuesta ya no existe.');
+    if (s.version !== version) return this.d.tg.answerCallback(cbId, `Esa es una versión vieja (v${version}). La vigente es v${s.version}.`);
+    if (s.approvedVersion === version) return this.d.tg.answerCallback(cbId, `La v${version} ya estaba aprobada; no se puede rechazar.`);
+    const first = await this.d.store.reject(chatId, sid, version);
+    if (!first) return this.d.tg.answerCallback(cbId, `La v${version} ya estaba rechazada.`);
+    await this.d.store.addHistory(chatId, sid, version, 'rechazada', `propuesta v${version} rechazada por la persona del chat; no se generó borrador`);
+    await this.d.tg.answerCallback(cbId, `Propuesta v${version} rechazada.`);
+    return this.say(chatId, REJECTED_NEXT(version));
   }
 
   async onAdjustDecision(cbId: string, chatId: number, confirm: boolean, nonce: string): Promise<void> {

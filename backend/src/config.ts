@@ -33,6 +33,8 @@ export const LIMITS = {
   maxFileBytes: 200 * 1024,
   maxZipUncompressedBytes: 4 * 1024 * 1024,
   maxZipEntries: 200,
+  maxSheetCols: 50,
+  forwardTimeoutMs: 60_000,
   maxUpdateAttempts: 3,
   retentionDays: 7,
   maxWebhookBodyBytes: 1024 * 1024,
