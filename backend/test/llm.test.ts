@@ -17,6 +17,13 @@ describe('OpenAiClient (fetch falso)', () => {
     expect(b.text.format).toMatchObject({ type: 'json_schema', name: 'intencion', strict: true });
     expect((seen!.init.headers as Record<string, string>).authorization).toBe('Bearer k-fake');
   });
+  it('el observador recibe status, usage y latencia, nunca la clave', async () => {
+    const infos: unknown[] = [];
+    const c = new OpenAiClient(async () => ok({ ...msgBody('x'), usage: { input_tokens: 10, output_tokens: 5, output_tokens_details: { reasoning_tokens: 2 } } }), 'k-secreta', 'm', 'low', (i) => infos.push(i));
+    await c.generate('s', 'u');
+    expect(infos[0]).toMatchObject({ httpStatus: 200, status: 'completed', usage: { input_tokens: 10, output_tokens: 5 } });
+    expect(JSON.stringify(infos)).not.toContain('k-secreta');
+  });
   it('trunca la entrada', async () => {
     let body: { input: string } | undefined;
     const c = new OpenAiClient(async (_u, init) => ((body = JSON.parse(String(init!.body))), ok(msgBody('x'))), 'k', 'm');
@@ -28,6 +35,7 @@ describe('OpenAiClient (fetch falso)', () => {
     ['incomplete con texto parcial', () => ok(msgBody('{"inte', 'incomplete')), 'incomplete'],
     ['texto vacío', () => ok({ status: 'completed', output: [{ type: 'reasoning' }] }), 'vacia'],
     ['tope de gasto 429', () => ok({ error: { code: 'project_spend_limit_exceeded' } }, 429), 'tope_gasto'],
+    ['sin créditos 429 (observado en la API real)', () => ok({ error: { code: 'credit_balance_exhausted' } }, 429), 'tope_gasto'],
     ['429 genérico', () => ok({ error: { code: 'rate_limit_exceeded' } }, 429), 'http'],
     ['500', () => new Response('x', { status: 500 }), 'http'],
   ];

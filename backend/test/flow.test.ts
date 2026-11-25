@@ -206,6 +206,15 @@ describe('IA: salida inválida, fallo y contenido hostil (doble de prueba de Ope
     expect(app.tg.last('message')!.text).toMatch(/^\(sin IA\) 6 insumos están bajo su mínimo/);
   });
 
+  it('sin créditos en OpenAI → mensaje honesto de tope de gasto', async () => {
+    const app = makeApp();
+    await loadMuestra(app);
+    const { LlmError } = await import('../src/llm');
+    app.llm.queue.push(new LlmError('tope_gasto'));
+    await app.msg(A, 'hola');
+    expect(app.tg.last('message')!.text).toMatch(/^\(sin IA\) La demo alcanzó su tope de gasto de IA/);
+  });
+
   it('/explicar acepta texto de IA con cifras correctas y rechaza cifras inventadas', async () => {
     const app = makeApp();
     await loadMuestra(app);

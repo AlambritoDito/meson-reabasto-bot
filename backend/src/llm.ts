@@ -20,12 +20,25 @@ export class LlmError extends Error {
   }
 }
 
+const SPEND_CODES = ['project_spend_limit_exceeded', 'credit_balance_exhausted', 'insufficient_quota'];
+
 export type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high';
+
+export interface LlmCallInfo {
+  httpStatus: number;
+  status?: string;
+  usage?: { input_tokens?: number; output_tokens?: number; output_tokens_details?: { reasoning_tokens?: number } };
+  ms: number;
+  errorCode?: string;
+  errorMessage?: string;
+}
 
 interface ResponsesBody {
   status?: string;
+  usage?: LlmCallInfo['usage'];
+  incomplete_details?: { reason?: string } | null;
   output?: { type?: string; content?: { type?: string; text?: string }[] }[];
-  error?: { code?: string } | null;
+  error?: { code?: string; message?: string; param?: string } | null;
 }
 
 export function extractOutputText(j: ResponsesBody): string {
@@ -43,6 +56,8 @@ export class OpenAiClient implements LlmClient {
     private apiKey: string,
     private model: string | undefined,
     private effort: ReasoningEffort = 'low',
+    /** Observador opcional (métricas de verificación); nunca recibe la clave. */
+    private onCall?: (info: LlmCallInfo) => void,
   ) {}
 
   async generate(system: string, user: string, schema?: JsonSchemaSpec): Promise<string> {
@@ -50,6 +65,7 @@ export class OpenAiClient implements LlmClient {
     if (!this.apiKey) throw new LlmError('config', 'OPENAI_API_KEY');
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), LIMITS.aiTimeoutMs);
+    const t0 = Date.now();
     try {
       const res = await this.fetchFn('https://api.openai.com/v1/responses', {
         method: 'POST',
@@ -71,7 +87,16 @@ export class OpenAiClient implements LlmClient {
       } catch {
         j = null;
       }
-      if (res.status === 429 && j?.error?.code === 'project_spend_limit_exceeded') throw new LlmError('tope_gasto');
+      this.onCall?.({
+        httpStatus: res.status,
+        status: j?.status,
+        usage: j?.usage,
+        ms: Date.now() - t0,
+        errorCode: j?.error?.code ?? j?.incomplete_details?.reason,
+        errorMessage: j?.error?.message?.slice(0, 300),
+      });
+      // Sin saldo o tope de gasto: fallo definitivo, sin reintentos (códigos observados/documentados de OpenAI).
+      if (res.status === 429 && SPEND_CODES.includes(j?.error?.code ?? '')) throw new LlmError('tope_gasto');
       if (!res.ok || !j) throw new LlmError('http', String(res.status));
       if (j.status === 'incomplete') throw new LlmError('incomplete');
       const text = extractOutputText(j);
