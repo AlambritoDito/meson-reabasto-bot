@@ -8,16 +8,27 @@ export interface InlineButton {
 export type Keyboard = InlineButton[][];
 
 export interface TelegramClient {
-  sendMessage(chatId: number, text: string, keyboard?: Keyboard): Promise<void>;
+  /** `html` usa parse_mode HTML: todo dato externo debe venir escapado (ui.esc). */
+  sendMessage(chatId: number, html: string, keyboard?: Keyboard): Promise<void>;
+  editMessageText(chatId: number, messageId: number, html: string, keyboard?: Keyboard): Promise<void>;
   answerCallback(callbackId: string, text?: string): Promise<void>;
   sendDocument(chatId: number, fileName: string, content: string, caption: string): Promise<void>;
   downloadFile(fileId: string): Promise<Uint8Array>;
 }
 
 export class TelegramApiError extends Error {
-  constructor(method: string, status: number) {
+  constructor(method: string, status: number, public description = '') {
     super(`Telegram ${method} falló (HTTP ${status})`);
   }
+}
+
+/** Recorta por líneas completas (cada etiqueta HTML abre y cierra en su línea), bajo el límite de 4096 de Telegram. */
+export function fitHtml(html: string, max = 4000): string {
+  if (html.length <= max) return html;
+  const suffix = '\n… (mensaje recortado; el detalle completo va en el borrador)';
+  const room = max - suffix.length;
+  const cut = html.lastIndexOf('\n', room);
+  return `${html.slice(0, cut > 0 ? cut : room)}${suffix}`;
 }
 
 /** Solo la API oficial o un servidor falso en loopback (pruebas E2E locales). Evita mandar el token a otro host. */
@@ -40,16 +51,32 @@ export class HttpTelegram implements TelegramClient {
     } catch {
       throw new TelegramApiError(method, 0);
     }
-    if (!res.ok) throw new TelegramApiError(method, res.status);
-    const j = (await res.json()) as { ok: boolean; result?: unknown };
-    if (!j.ok) throw new TelegramApiError(method, res.status);
+    let j: { ok?: boolean; result?: unknown; description?: string } = {};
+    try {
+      j = (await res.json()) as typeof j;
+    } catch {
+      /* sin cuerpo JSON */
+    }
+    if (!res.ok || !j.ok) throw new TelegramApiError(method, res.status, String(j.description ?? '').slice(0, 200));
     return j.result;
   }
 
-  async sendMessage(chatId: number, text: string, keyboard?: Keyboard): Promise<void> {
-    const body: Record<string, unknown> = { chat_id: chatId, text: text.slice(0, 4000) };
+  async sendMessage(chatId: number, html: string, keyboard?: Keyboard): Promise<void> {
+    const body: Record<string, unknown> = { chat_id: chatId, text: fitHtml(html), parse_mode: 'HTML', link_preview_options: { is_disabled: true } };
     if (keyboard) body.reply_markup = { inline_keyboard: keyboard };
     await this.call('sendMessage', JSON.stringify(body), { 'content-type': 'application/json' });
+  }
+
+  async editMessageText(chatId: number, messageId: number, html: string, keyboard?: Keyboard): Promise<void> {
+    const body: Record<string, unknown> = { chat_id: chatId, message_id: messageId, text: fitHtml(html), parse_mode: 'HTML', link_preview_options: { is_disabled: true } };
+    if (keyboard) body.reply_markup = { inline_keyboard: keyboard };
+    try {
+      await this.call('editMessageText', JSON.stringify(body), { 'content-type': 'application/json' });
+    } catch (e) {
+      // Pulsar dos veces el mismo botón deja el texto igual: Telegram responde 400 «message is not modified».
+      if (e instanceof TelegramApiError && /message is not modified/i.test(e.description)) return;
+      throw e;
+    }
   }
 
   async answerCallback(callbackId: string, text?: string): Promise<void> {

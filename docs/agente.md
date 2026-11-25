@@ -154,19 +154,20 @@ Temporada sobre Jitomate:
 ## 11. Mensajes tipo y tono de voz
 
 - **Identidad [supuesto]:** «MesonBot» (nombre visible del bot en Telegram). En `/start` se presenta como asistente automático de demostración.
-- **Tono [supuesto]:** de tú, mensajes cortos, sin emojis.
+- **Tono [confirmado por Alan]:** de tú, mensajes cortos, con emojis moderados y de significado constante: 🚨 bajo mínimo, ⚠️ dato inválido, ✅ aprobado, ❌ rechazado, 🧾 propuesta, 🤖 respuesta redactada por IA. Las alertas siempre llevan texto, no solo el emoji. Las respuestas sin IA conservan la marca «(sin IA)».
 - **Borrador al proveedor [supuesto, implementado]:** archivo `borrador-pedido-vN.txt` generado con plantilla fija.
   - Encabezado «BORRADOR DE PEDIDO — DEMOSTRACIÓN CON DATOS FICTICIOS» y aviso de que el bot no envía nada.
   - Por proveedor: «PARA:», saludo, insumos con cantidad, unidad, costo unitario y subtotal, y petición de confirmar disponibilidad y fecha.
   - Al final: total, filas excluidas e historial.
   - Canal de envío real: lo decide la persona que envía. Formato definitivo: Pendiente: sin dato.
 - **Mensajes tipo [supuesto, implementado]**, textuales del código:
-  - Bienvenida: «Hola. Soy un asistente automático de DEMOSTRACIÓN para reabastecimiento con datos ficticios. […] Tú apruebas; yo nunca envío nada a proveedores.»
+  - Bienvenida: «👋 Hola. Soy un asistente automático de DEMOSTRACIÓN para reabastecimiento con datos ficticios. […] Tú apruebas; yo nunca envío nada a proveedores.» y el menú con botones.
   - Datos inválidos: «Filas excluidas por datos inválidos (N); no invento valores:» y luego fila y campo.
   - Sin faltantes: «Ningún insumo válido está bajo su mínimo. No propongo compras.»
-  - Aprobación: «Aprobaste la propuesta vN. Te envío el borrador. Recuerda: yo no envío nada a proveedores; tú decides si lo mandas.»
-  - Rechazo: «Rechazaste la propuesta vN. No genero borrador. Para una nueva propuesta: ajusta con /temporada, carga /muestra o sube otro inventario.»
-  - Límite: «(sin IA) Llegaste al límite de IA (…). Usa los comandos: /ayuda»
+  - Aprobación: «✅ Aprobaste la propuesta vN. Te envío el borrador. Recuerda: yo no envío nada a proveedores; tú decides si lo mandas.»
+  - Rechazo: «❌ Rechazaste la propuesta vN. No genero borrador. Para una nueva propuesta: ajusta por temporada, carga la muestra o sube otro inventario.»
+  - Límite: «(sin IA) Llegaste al límite de IA (…). Usa el menú.»
+  - Botón viejo: «Esta versión (vN) ya no está vigente. La vigente es vM.»
 
 ## 12. Casos difíciles y escalamiento
 
@@ -187,14 +188,14 @@ Temporada sobre Jitomate:
 
 - **Canal [hoja]:** bot de Telegram para consultar inventarios, solicitar propuestas y aprobar o rechazar pedidos, sin instalar otra aplicación. Usuario: `@mesondemobot`. Página explicativa con QR en `site/`.
 - **Disponibilidad [confirmado por Alan]:** el bot corre en el equipo del responsable solo durante las sesiones de demostración, hasta el 10 de diciembre de 2026.
-- **Vistas en el chat [supuesto, implementado]:**
-  - carga del inventario;
-  - alertas y datos faltantes;
-  - propuesta por proveedor;
-  - ajuste por temporada con confirmación;
-  - aprobación o rechazo con botones;
-  - borrador descargable;
-  - historial.
+- **Navegación en el chat [confirmado por Alan]:** estilo BotFather, con botones dentro del chat en lugar de memorizar comandos.
+  - Menú principal inline de 2 columnas en /start, /menu y debajo de las respuestas. Solo muestra lo que tiene sentido según el estado: sin inventario, cargar, subir, límites y ayuda; con propuesta, ver, aprobar o rechazar, alertas, explicar y ajustar; aprobada, descargar el borrador.
+  - Al pulsar un botón de vista, el bot edita ese mismo mensaje y ofrece «« Volver». Aprobar, rechazar y los borradores llegan como mensajes nuevos.
+  - Temporada sin teclear: alcance (todo, por proveedor o por insumo, con listas paginadas), porcentaje predefinido (−50, −30, −20, −10, +10, +20, +30 o +50), antes/después y «✅ Confirmar ajuste» o «« Cancelar».
+  - Borrar datos pide confirmación con botones.
+  - Menú nativo de comandos de Telegram con descripciones breves en español.
+  - Los comandos de texto y el texto libre siguen funcionando.
+- **Vistas en el chat [supuesto, implementado]:** menú, carga del inventario, alertas y datos faltantes, propuesta por proveedor, ajuste por temporada con confirmación, aprobación o rechazo, borrador descargable, historial, límites y ayuda.
 - **Identidad [supuesto]:** «MesonBot», asistente automático de demostración.
 - **Colores [confirmado por Alan como dirección; códigos exactos y uso de marca por confirmar con el cliente]:** paleta inspirada en la identidad pública del Mesón.
   - Terracota `#b5501a` en bloques con texto blanco, y `#a3440f` en botones.

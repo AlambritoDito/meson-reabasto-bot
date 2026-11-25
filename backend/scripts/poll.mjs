@@ -44,6 +44,45 @@ async function tgCall(fetchFn, token, method, body, signal, base) {
   return j.result;
 }
 
+// Menú nativo de Telegram (setMyCommands) y textos públicos del bot. Idempotente: repetirlo deja lo mismo.
+export const BOT_COMMANDS = [
+  { command: 'start', description: 'Inicio y menú con botones' },
+  { command: 'menu', description: 'Abrir el menú' },
+  { command: 'muestra', description: 'Cargar el inventario ficticio' },
+  { command: 'explicar', description: 'Explicar la propuesta' },
+  { command: 'temporada', description: 'Ajustar por temporada' },
+  { command: 'aprobar', description: 'Aprobar o rechazar la propuesta' },
+  { command: 'borrador', description: 'Descargar el borrador aprobado' },
+  { command: 'historial', description: 'Historial de la sesión' },
+  { command: 'limites', description: 'Mis límites de uso' },
+  { command: 'borrar', description: 'Borrar mis datos' },
+  { command: 'ayuda', description: 'Ayuda' },
+];
+export const BOT_DESCRIPTION =
+  'Asistente automático de DEMOSTRACIÓN para reabastecimiento con datos ficticios. Revisa un inventario contra mínimos, propone un pedido por proveedor y prepara un borrador. Una persona aprueba; el bot no envía pedidos a proveedores.';
+export const BOT_SHORT_DESCRIPTION = 'Demo con datos ficticios: propone pedidos de reabastecimiento y tú apruebas. No envía pedidos.';
+
+export async function configureBot(fetchFn, token, base, log = () => {}) {
+  const calls = [
+    ['setMyCommands', { commands: BOT_COMMANDS }],
+    ['setMyCommands', { commands: BOT_COMMANDS, language_code: 'es' }],
+    ['setChatMenuButton', { menu_button: { type: 'commands' } }],
+    ['setMyDescription', { description: BOT_DESCRIPTION }],
+    ['setMyShortDescription', { short_description: BOT_SHORT_DESCRIPTION }],
+  ];
+  let ok = 0;
+  for (const [method, body] of calls) {
+    try {
+      await tgCall(fetchFn, token, method, body, undefined, base);
+      ok++;
+    } catch (e) {
+      log(`configuración del bot: ${e instanceof Error ? e.message : 'error'} (se continúa)`);
+    }
+  }
+  log(`configuración del bot: ${ok}/${calls.length} aplicadas (menú de comandos y descripciones)`);
+  return ok;
+}
+
 export async function deleteWebhook(fetchFn, token, base) {
   return tgCall(fetchFn, token, 'deleteWebhook', { drop_pending_updates: false }, undefined, base);
 }

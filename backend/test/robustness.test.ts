@@ -148,7 +148,7 @@ describe('aislamiento entre chats y permisos de botones', () => {
     await app.msg(A, '/muestra');
     for (const d of ['ap:zzzz:1', 'ap:10000001:999999999', 'borrar_todo', 'aj:../../', '']) {
       await app.click(A, d);
-      expect(app.tg.last('callback')!.text).toMatch(/no válido|ya no existe|versión vieja/);
+      expect(app.tg.last('callback')!.text).toMatch(/no válido|ya no existe|ya no está vigente/);
     }
     expect(verRow(app, A)!.approved_version).toBeNull();
   });
@@ -277,6 +277,9 @@ describe('borrado, retención y fecha de corte', () => {
     const ap = app.tg.last('message')!.keyboard![0][0].callback_data;
     await app.msg(B, '/muestra');
     await app.msg(A, '/borrar');
+    expect(verRow(app, A)).toBeDefined(); // primero pide confirmación con botones
+    expect(app.tg.last('message')!.keyboard![0].map((x) => x.callback_data)).toEqual(['del:y', 'm:home']);
+    await app.click(A, 'del:y');
     expect(verRow(app, A)).toBeUndefined();
     expect(app.db.db.prepare('SELECT COUNT(*) n FROM history WHERE chat_id = ?').get(A)).toEqual({ n: 0 });
     expect(verRow(app, B)).toBeDefined();
@@ -300,6 +303,8 @@ describe('borrado, retención y fecha de corte', () => {
       expect(app.tg.last('message')!.text).toMatch(/demo ya concluyó/);
       expect(app.db.count('sessions')).toBe(0);
       await app.msg(A, '/borrar');
+      expect(app.tg.last('message')!.text).toMatch(/¿Borrar tus datos/);
+      await app.click(A, 'del:y'); // la confirmación de borrado funciona aunque la demo haya concluido
       expect(app.tg.last('message')!.text).toMatch(/borré/);
     }
   });

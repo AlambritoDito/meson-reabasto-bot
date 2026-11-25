@@ -60,11 +60,35 @@ export class FakeD1 implements D1Database {
 }
 
 export interface Sent {
-  kind: 'message' | 'callback' | 'document';
+  kind: 'message' | 'callback' | 'document' | 'edit';
   chatId?: number;
+  messageId?: number;
+  /** Texto visible (HTML sin etiquetas y con entidades decodificadas). */
   text: string;
+  /** HTML crudo tal como se mandaría a Telegram (parse_mode HTML). */
+  html?: string;
   keyboard?: Keyboard;
   fileName?: string;
+}
+
+/** Texto que vería la persona: quita etiquetas y decodifica las entidades que usa el bot. */
+export function visible(html: string): string {
+  return html.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+}
+
+/** Comprueba que el HTML solo usa etiquetas permitidas, bien anidadas, y que no hay «<» o «&» sin escapar. */
+export function assertValidHtml(html: string): void {
+  const stack: string[] = [];
+  const re = /<(\/?)([a-z]+)>|<|&(?!(lt|gt|amp|quot);)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    if (!m[2]) throw new Error(`HTML inválido cerca de: ${html.slice(Math.max(0, m.index - 20), m.index + 20)}`);
+    if (!['b', 'i', 'code'].includes(m[2])) throw new Error(`etiqueta no permitida: ${m[2]}`);
+    if (m[1]) {
+      if (stack.pop() !== m[2]) throw new Error(`etiqueta mal cerrada: ${m[2]}`);
+    } else stack.push(m[2]);
+  }
+  if (stack.length) throw new Error(`etiquetas sin cerrar: ${stack.join(',')}`);
 }
 
 /** Doble de prueba de Telegram: registra lo que el bot "enviaría". */
@@ -78,9 +102,20 @@ export class FakeTelegram implements TelegramClient {
       throw new Error('fake telegram caído');
     }
   }
-  async sendMessage(chatId: number, text: string, keyboard?: Keyboard) {
+  async sendMessage(chatId: number, html: string, keyboard?: Keyboard) {
     this.maybeFail();
-    this.sent.push({ kind: 'message', chatId, text, keyboard });
+    assertValidHtml(html);
+    this.sent.push({ kind: 'message', chatId, text: visible(html), html, keyboard });
+  }
+  editFails = 0;
+  async editMessageText(chatId: number, messageId: number, html: string, keyboard?: Keyboard) {
+    this.maybeFail();
+    if (this.editFails > 0) {
+      this.editFails--;
+      throw new Error('fake: message to edit not found');
+    }
+    assertValidHtml(html);
+    this.sent.push({ kind: 'edit', chatId, messageId, text: visible(html), html, keyboard });
   }
   async answerCallback(_id: string, text?: string) {
     this.sent.push({ kind: 'callback', text: text ?? '' });
@@ -95,8 +130,14 @@ export class FakeTelegram implements TelegramClient {
     if (!f) throw new Error('fake: archivo no existe');
     return f;
   }
+  /** Última vista mostrada al usuario: mensaje nuevo o edición. */
+  shown() {
+    const xs = this.sent.filter((s) => s.kind === 'message' || s.kind === 'edit');
+    return xs[xs.length - 1];
+  }
+  /** `last('message')` devuelve lo último que ve la persona en el chat (mensaje nuevo o mensaje editado). */
   last(kind?: Sent['kind']) {
-    const xs = kind ? this.sent.filter((s) => s.kind === kind) : this.sent;
+    const xs = kind === 'message' ? this.sent.filter((s) => s.kind === 'message' || s.kind === 'edit') : kind ? this.sent.filter((s) => s.kind === kind) : this.sent;
     return xs[xs.length - 1];
   }
   buttons(): string[] {
@@ -152,8 +193,8 @@ export function makeApp(opts: { demoUntil?: string; now?: () => number; maxTotal
   };
   const msg = (chatId: number, text: string, extra: Record<string, unknown> = {}) =>
     post({ update_id: ++updateId, message: { message_id: ++seq, chat: { id: chatId, type: 'private' }, from: { id: chatId }, text, ...extra } });
-  const click = (chatId: number, data: string, fromId = chatId) =>
-    post({ update_id: ++updateId, callback_query: { id: `cb${++seq}`, from: { id: fromId }, data, message: { chat: { id: chatId, type: 'private' } } } });
+  const click = (chatId: number, data: string, fromId = chatId, messageId = 900) =>
+    post({ update_id: ++updateId, callback_query: { id: `cb${++seq}`, from: { id: fromId }, data, message: { message_id: messageId, chat: { id: chatId, type: 'private' } } } });
   const doc = (chatId: number, name: string, bytes: Uint8Array, size = bytes.length) => {
     const fid = `f${++seq}`;
     tg.files.set(fid, bytes);

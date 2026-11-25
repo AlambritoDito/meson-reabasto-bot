@@ -54,3 +54,38 @@ describe('poller (fetch falso)', () => {
     expect(parseDevVars('# c\nA=1\nB="dos"\n\nC=\n')).toEqual({ A: '1', B: 'dos', C: '' });
   });
 });
+
+describe('configuración nativa del bot (fetch falso)', () => {
+  it('registra comandos (por defecto y es), botón de menú y descripciones dentro de los límites de Telegram', async () => {
+    // @ts-expect-error módulo JS sin tipos
+    const { configureBot, BOT_COMMANDS, BOT_DESCRIPTION, BOT_SHORT_DESCRIPTION } = await import('../scripts/poll.mjs');
+    const calls: { method: string; body: Record<string, unknown> }[] = [];
+    const fn = async (url: string, init: RequestInit) => {
+      calls.push({ method: url.split('/').pop()!, body: JSON.parse(String(init.body)) });
+      return new Response(JSON.stringify({ ok: true, result: true }));
+    };
+    const logs: string[] = [];
+    expect(await configureBot(fn, TOKEN, undefined, (m: string) => logs.push(m))).toBe(5);
+    expect(calls.map((c) => c.method)).toEqual(['setMyCommands', 'setMyCommands', 'setChatMenuButton', 'setMyDescription', 'setMyShortDescription']);
+    expect(calls[1].body.language_code).toBe('es');
+    expect(calls[2].body).toEqual({ menu_button: { type: 'commands' } });
+    for (const c of BOT_COMMANDS as { command: string; description: string }[]) {
+      expect(c.command).toMatch(/^[a-z0-9_]{1,32}$/);
+      expect(c.description.length).toBeGreaterThan(0);
+      expect(c.description.length).toBeLessThanOrEqual(256);
+    }
+    expect(BOT_DESCRIPTION.length).toBeLessThanOrEqual(512);
+    expect(BOT_SHORT_DESCRIPTION.length).toBeLessThanOrEqual(120);
+    expect(BOT_DESCRIPTION).toMatch(/DEMOSTRACIÓN/);
+    expect(BOT_DESCRIPTION).toMatch(/no envía pedidos/);
+    expect(logs.join(' ')).not.toContain(TOKEN);
+  });
+  it('un fallo de configuración no detiene la demo', async () => {
+    // @ts-expect-error módulo JS sin tipos
+    const { configureBot } = await import('../scripts/poll.mjs');
+    const fn = async () => new Response(JSON.stringify({ ok: false, description: 'Too Many Requests' }), { status: 429 });
+    const logs: string[] = [];
+    expect(await configureBot(fn, TOKEN, undefined, (m: string) => logs.push(m))).toBe(0);
+    expect(logs.join(' ')).toMatch(/0\/5 aplicadas/);
+  });
+});

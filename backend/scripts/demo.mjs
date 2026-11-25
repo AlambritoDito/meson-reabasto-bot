@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { parseDevVars, runPoller } from './poll.mjs';
+import { parseDevVars, runPoller, configureBot } from './poll.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pidFile = join(root, '.wrangler', 'demo.pid');
@@ -89,7 +89,9 @@ if (!(await waitHealth())) {
   console.error('El Worker local no respondió /health.');
   shutdown(1);
 } else {
-  console.log(`Worker local listo en http://127.0.0.1:${port}. Iniciando poller…`);
+  console.log(`Worker local listo en http://127.0.0.1:${port}. Configurando el menú del bot…`);
+  await configureBot(fetch, vars.TELEGRAM_BOT_TOKEN, vars.TELEGRAM_API_BASE, (m) => console.log(m));
+  console.log('Iniciando poller…');
   runPoller({ token: vars.TELEGRAM_BOT_TOKEN, secret: vars.WEBHOOK_SECRET, workerUrl: `http://127.0.0.1:${port}/tg`, signal: ctrl.signal, base: vars.TELEGRAM_API_BASE })
     .catch((e) => console.error(`poller: ${e.message}`))
     .finally(() => shutdown(0));

@@ -74,7 +74,7 @@
         <ol class="pasos">
           <li>
             <h3>Carga el inventario</h3>
-            <p>Envía al bot un archivo CSV o XLSX con el inventario, o usa <code>/muestra</code> para cargar el inventario ficticio de ejemplo.</p>
+            <p>Escribe <code>/start</code> y usa los botones del menú: «📦 Cargar muestra» carga el inventario ficticio de ejemplo y «📄 Subir mi archivo» explica cómo enviar un CSV o XLSX. No necesitas memorizar comandos.</p>
           </li>
           <li>
             <h3>El programa revisa</h3>
@@ -86,15 +86,15 @@
           </li>
           <li>
             <h3>Pregunta lo que necesites</h3>
-            <p>Con <code>/explicar</code> la IA explica en lenguaje sencillo por qué entra cada insumo; también puedes escribir en texto libre y la IA interpreta qué quieres hacer.</p>
+            <p>Con «💬 Explicar» la IA explica en lenguaje sencillo por qué entra cada insumo, citando sus cifras; también puedes escribir en texto libre y la IA interpreta qué quieres hacer.</p>
           </li>
           <li>
             <h3>Ajusta por temporada</h3>
-            <p>Con <code>/temporada</code> indicas un cambio de demanda; el bot muestra el antes y el después, nunca propone más allá del máximo y te pide confirmar.</p>
+            <p>Con «🌦️ Ajustar por temporada» eliges con botones a qué aplicarlo (todo, un proveedor o un insumo) y el porcentaje. El bot muestra el antes y el después, nunca propone más allá del máximo y te pide confirmar.</p>
           </li>
           <li>
             <h3>Aprueba o rechaza tu simulación</h3>
-            <p><code>/aprobar</code> muestra la propuesta con los botones <strong>Aprobar</strong> y <strong>Rechazar</strong>. Si apruebas, recibes el borrador como archivo de texto (también con <code>/borrador</code>); si rechazas, no se genera borrador. El borrador lo enviaría una persona; el bot no lo hace.</p>
+            <p>La propuesta trae los botones <strong>✅ Aprobar</strong> y <strong>❌ Rechazar</strong>. Si apruebas, recibes el borrador como archivo de texto (después, «⬇️ Descargar borrador»); si rechazas, no se genera borrador. El borrador lo enviaría una persona; el bot no lo hace.</p>
           </li>
         </ol>
       </div>
@@ -194,10 +194,11 @@
         <p class="probar__accion"><a class="boton" href="https://t.me/mesondemobot" rel="noopener">Abrir @mesondemobot en Telegram</a> <span class="nota">o usa el QR de <a href="#titulo">arriba</a>.</span></p>
         <p class="aviso aviso--info"><strong>El bot solo responde durante las sesiones de demostración.</strong> Corre en el equipo de la persona responsable únicamente mientras la demo está encendida, en sesiones hasta el 10 de diciembre de 2026. Fuera de ese horario el QR y el enlace abren el chat, pero no habrá respuesta. Si quieres probarlo cuando quieras, <a href="#correlo">córrelo tú mismo</a>.</p>
 
-        <h3>Comandos</h3>
+        <h3>Menú y comandos</h3>
+        <p>Todo se hace con los botones del menú dentro del chat (como en BotFather). Los comandos son opcionales y también aparecen en el botón «Menú» de Telegram.</p>
         <dl class="comandos">
-          <div><dt><code>/start</code></dt><dd>Inicia tu sesión de demo.</dd></div>
-          <div><dt><code>/ayuda</code></dt><dd>Lista de comandos.</dd></div>
+          <div><dt><code>/start</code> · <code>/menu</code></dt><dd>Inicia tu sesión de demo y abre el menú con botones.</dd></div>
+          <div><dt><code>/ayuda</code></dt><dd>Ayuda y lista de comandos.</dd></div>
           <div><dt><code>/muestra</code></dt><dd>Carga el inventario ficticio de ejemplo.</dd></div>
           <div><dt>Archivo CSV o XLSX</dt><dd>Envíalo al chat para revisarlo (solo datos ficticios; máx. 200 KB y 500 filas, 5 archivos al día).</dd></div>
           <div><dt><code>/explicar</code></dt><dd>Explicación del pedido propuesto.</dd></div>
@@ -206,7 +207,7 @@
           <div><dt><code>/borrador</code></dt><dd>Descarga el borrador (archivo de texto) del pedido aprobado.</dd></div>
           <div><dt><code>/historial</code></dt><dd>Versiones, ajustes, aprobaciones y rechazos de tu sesión.</dd></div>
           <div><dt><code>/limites</code></dt><dd>Cuánto uso de IA te queda hoy.</dd></div>
-          <div><dt><code>/borrar</code></dt><dd>Elimina los datos de tu sesión.</dd></div>
+          <div><dt><code>/borrar</code></dt><dd>Elimina los datos de tu sesión (pide confirmación).</dd></div>
         </dl>
       </div>
     </section>
@@ -233,7 +234,7 @@
         <dl class="definiciones">
           <div><dt>Qué se guarda</dt><dd>El identificador numérico de tu chat (lo asigna Telegram), el inventario que cargues, los pedidos calculados, tus ajustes, aprobaciones y el conteo de uso de IA. No pedimos teléfono ni nombre.</dd></div>
           <div><dt>Dónde y cuánto tiempo</dt><dd>En una base de datos local del equipo que corre la demo. Lo que tiene más de 7 días se elimina en la siguiente actividad del bot, y la base se borra al terminar el proyecto.</dd></div>
-          <div><dt>Cómo borrarlo</dt><dd>Escribe <code>/borrar</code> en el chat del bot para eliminar los datos de tu sesión en cualquier momento.</dd></div>
+          <div><dt>Cómo borrarlo</dt><dd>Toca «🗑️ Borrar mis datos» o escribe <code>/borrar</code> y confirma; se eliminan los datos de tu sesión en cualquier momento.</dd></div>
           <div><dt>Esta página</dt><dd>No usa cookies, rastreadores, analíticas ni recursos externos.</dd></div>
         </dl>
       </div>

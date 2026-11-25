@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runPoller } from './poll.mjs';
+import { runPoller, configureBot } from './poll.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const wranglerBin = join(root, 'node_modules', '.bin', 'wrangler');
@@ -54,7 +54,9 @@ const server = http.createServer(async (req, res) => {
     sent.push({ method, body: raw.toString('utf8') });
     return reply({ message_id: 1 });
   }
-  sent.push({ method, body: JSON.parse(raw.toString()) });
+  const body = JSON.parse(raw.toString());
+  if (typeof body.text === 'string') body.text = body.text.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); // texto visible
+  sent.push({ method, body });
   return reply(true);
 });
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -97,7 +99,7 @@ function check(name, cond) {
 const A = 7001;
 const B = 7002;
 const msg = (chat, text) => queue.push({ update_id: nextId++, message: { message_id: nextId, chat: { id: chat, type: 'private' }, from: { id: chat }, text } });
-const click = (chat, data) => queue.push({ update_id: nextId++, callback_query: { id: `cb${nextId}`, from: { id: chat }, data, message: { chat: { id: chat, type: 'private' } } } });
+const click = (chat, data) => queue.push({ update_id: nextId++, callback_query: { id: `cb${nextId}`, from: { id: chat }, data, message: { message_id: 500, chat: { id: chat, type: 'private' } } } });
 async function until(pred, ms = 15000) {
   const t = Date.now();
   while (Date.now() - t < ms) {
@@ -107,7 +109,7 @@ async function until(pred, ms = 15000) {
   }
   return null;
 }
-const msgs = (chat) => sent.filter((s) => s.method === 'sendMessage' && s.body.chat_id === chat);
+const msgs = (chat) => sent.filter((s) => (s.method === 'sendMessage' || s.method === 'editMessageText') && s.body.chat_id === chat);
 const lastMsg = (chat) => msgs(chat).at(-1);
 const cbs = () => sent.filter((s) => s.method === 'answerCallbackQuery');
 const docs = () => sent.filter((s) => s.method === 'sendDocument');
@@ -121,8 +123,12 @@ try {
   await waitHealth();
   const poller = runPoller({ token: TOKEN, secret: SECRET, workerUrl: `http://127.0.0.1:${PORT}/tg`, signal: ctrl.signal, base, timeoutSec: 1, log: () => {}, sleep: (ms) => new Promise((r) => setTimeout(r, Math.min(ms, 500))) });
 
+  check('configuración del bot (5 llamadas: comandos, menú, descripciones)', (await configureBot(fetch, TOKEN, base)) === 5 && sent.filter((s) => /^set(MyCommands|ChatMenuButton|MyDescription|MyShortDescription)$/.test(s.method)).length === 5);
   msg(A, '/start');
   check('/start se identifica como asistente automático de demostración', await until(() => /DEMOSTRACIÓN/.test(lastMsg(A)?.body.text ?? '')));
+  check('/start trae menú inline (parse_mode HTML)', lastMsg(A)?.body.parse_mode === 'HTML' && lastMsg(A)?.body.reply_markup?.inline_keyboard?.[0]?.[0]?.callback_data === 'm:load');
+  click(A, 'm:help');
+  check('botón del menú edita el mensaje (editMessageText) y responde el callback', await until(() => sent.some((s) => s.method === 'editMessageText' && s.body.message_id === 500 && /Ayuda/.test(s.body.text))) && (await until(() => cbs().length >= 1)));
   msg(A, '/muestra');
   const prop = await until(() => msgs(A).find((m) => /bajo mínimo/.test(m.body.text)));
   check('/muestra → 6 bajo mínimo, fila 20 excluida, total $6808.00', prop && /6 insumos bajo mínimo/.test(prop.body.text) && /fila 20/.test(prop.body.text) && /\$6808\.00/.test(prop.body.text));
@@ -134,7 +140,7 @@ try {
   const v2 = await until(() => msgs(A).find((m) => /propuesta v2/.test(m.body.text)));
   check('confirmar ajuste → propuesta v2 total $5128.00', v2 && /\$5128\.00/.test(v2.body.text));
   click(A, ap1);
-  check('botón v1 viejo rechazado', await until(() => cbs().find((c) => /versión vieja/.test(c.body.text))));
+  check('botón v1 viejo rechazado («ya no está vigente»)', await until(() => cbs().find((c) => /ya no está vigente/.test(c.body.text ?? ''))));
 
   // Reinicio del Worker a mitad: el update de aprobación llega con el Worker caído.
   stopWorker();
@@ -167,7 +173,10 @@ try {
   check('chat B sube CSV sin faltantes → no propone compras (sin cruce con A)', await until(() => /No propongo compras/.test(lastMsg(B)?.body.text ?? '')));
 
   msg(A, '/borrar');
-  check('/borrar confirma borrado', await until(() => /borré/.test(lastMsg(A)?.body.text ?? '')));
+  const conf = await until(() => msgs(A).find((m) => /¿Borrar tus datos/.test(m.body.text)));
+  check('/borrar pide confirmación con botones', conf && conf.body.reply_markup.inline_keyboard[0][0].callback_data === 'del:y');
+  click(A, 'del:y');
+  check('confirmar borra (vista editada)', await until(() => sent.some((s) => s.method === 'editMessageText' && /borré/.test(s.body.text))));
   msg(A, '/aprobar');
   check('tras /borrar no queda sesión', await until(() => /Aún no hay inventario/.test(lastMsg(A)?.body.text ?? '')));
 

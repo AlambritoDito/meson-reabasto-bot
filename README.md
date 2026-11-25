@@ -77,7 +77,7 @@ npm run e2e:local                   # recorrido local con un Telegram FALSO y si
 npm run demo                        # aplica migraciones D1 locales, levanta wrangler dev y el poller
 ```
 
-Con la demo encendida, abre tu bot en Telegram, escribe `/start` y luego `/muestra`. `/aprobar` muestra los botones «Aprobar» y «Rechazar»: aprobar envía el borrador como archivo de texto; rechazar lo registra y no genera borrador.
+Con la demo encendida, abre tu bot en Telegram y escribe `/start`: aparece un menú con botones (estilo BotFather) que solo muestra lo que tiene sentido en cada momento. «📦 Cargar muestra» carga el inventario ficticio. La propuesta trae «✅ Aprobar» y «❌ Rechazar»: aprobar envía el borrador como archivo de texto; rechazar lo registra y no genera borrador. «🌦️ Ajustar por temporada» se hace con botones (alcance y porcentaje), con antes/después y confirmación, y «🗑️ Borrar mis datos» pide confirmación. Los comandos (`/muestra`, `/temporada -10`, `/aprobar`, `/borrador`, `/historial`, `/limites`, `/borrar`, `/ayuda`, `/menu`) siguen funcionando. Al arrancar, `npm run demo` registra en Telegram el menú de comandos y la descripción del bot.
 
 Solo un proceso puede leer las actualizaciones de un bot a la vez: `npm run demo` se niega a arrancar si ya hay otra demo registrada, y el poller elimina cualquier webhook previo del bot al iniciar. `npm run db:migrate:local` aplica las migraciones por separado si lo necesitas.
 

@@ -53,7 +53,7 @@ describe('recorrido /muestra → propuesta → /temporada → aprobar → borrad
 
     // Botón viejo v1 no aprueba
     await app.click(A, ap1);
-    expect(app.tg.last('callback')!.text).toMatch(/versión vieja/);
+    expect(app.tg.last('callback')!.text).toMatch(/ya no está vigente/);
     expect(verRow().approved_version).toBeNull();
 
     // Aprobar v2 → un borrador
@@ -117,7 +117,7 @@ describe('casos docentes D01–D05 (dobles de prueba)', () => {
     await app.doc(A, 'inventario-sin-faltantes.csv', fxBytes('inventario-sin-faltantes.csv'));
     const m = app.tg.last('message')!;
     expect(m.text).toMatch(/No propongo compras/);
-    expect(m.keyboard).toBeUndefined();
+    expect(app.tg.buttons().filter((d) => /^(ap|rj):/.test(d))).toHaveLength(0); // sin Aprobar/Rechazar
     await app.msg(A, '/aprobar');
     expect(app.tg.last('message')!.text).toMatch(/No hay nada que aprobar/);
   });
@@ -153,7 +153,7 @@ describe('casos docentes D01–D05 (dobles de prueba)', () => {
     // +20 % sobre 13 kg = 15.6 → 16, pero el tope máximo − existencia es 13: no cambia nada y se dice.
     expect(pv.text).toBe(
       [
-        'Ajuste por temporada propuesto: +20 % a insumo Cafe en grano.',
+        '🌦️ Ajuste por temporada propuesto: +20 % a insumo Cafe en grano.',
         'Algunas cantidades quedaron topadas para no superar el máximo.',
         '',
         'Antes → después:',
@@ -163,7 +163,7 @@ describe('casos docentes D01–D05 (dobles de prueba)', () => {
         'Nada cambia hasta que confirmes.',
       ].join('\n'),
     );
-    expect(pv.keyboard![0][0].text).toBe('Confirmar ajuste');
+    expect(pv.keyboard![0][0].text).toBe('✅ Confirmar ajuste');
     expect((app.db.db.prepare('SELECT version FROM sessions').get() as { version: number }).version).toBe(1);
   });
 
@@ -174,7 +174,7 @@ describe('casos docentes D01–D05 (dobles de prueba)', () => {
     const pv = app.tg.last('message')!;
     expect(pv.text).toBe(
       [
-        'Ajuste por temporada propuesto: -20 % a todos los insumos.',
+        '🌦️ Ajuste por temporada propuesto: -20 % a todos los insumos.',
         '',
         'Antes → después:',
         '• Leche entera: 52 → 42 litro (tope 52)',
@@ -310,7 +310,7 @@ describe('Rechazar propuesta (hoja del equipo: aprobar o rechazar pedidos)', () 
     const app = makeApp();
     await loadMuestra(app);
     const kb = app.tg.last('message')!.keyboard![0];
-    expect(kb.map((b) => b.text)).toEqual(['Aprobar v1', 'Rechazar v1']);
+    expect(kb.map((b) => b.text)).toEqual(['✅ Aprobar v1', '❌ Rechazar v1']);
     const [ap1, rj1] = kb.map((b) => b.callback_data);
     expect(rj1).toMatch(/^rj:[0-9a-f]{8}:1$/);
     await app.click(A, rj1);
