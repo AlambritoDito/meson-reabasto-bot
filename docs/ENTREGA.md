@@ -14,6 +14,7 @@ Proyecto académico de demostración con datos ficticios. El agente propone y re
    - Configuración (instrucciones del modelo y qué hace el programa): [docs/configuracion.md](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/configuracion.md)
    - **Capturas:** las aporta el equipo en la entrega.
 4. **Registro de pruebas con los cinco casos:** [docs/registro-pruebas.md](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/registro-pruebas.md)
+   - Recorrido en vivo por Telegram real: [sección del registro](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/registro-pruebas.md#recorrido-en-vivo-por-telegram-real-2026-11-25)
 5. **Pendientes y supuestos:** [docs/pendientes.md](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/pendientes.md)
 
 ## Datos de muestra

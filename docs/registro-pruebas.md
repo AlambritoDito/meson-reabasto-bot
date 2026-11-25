@@ -23,11 +23,11 @@ No se publican identificadores de chat, tokens ni claves.
 
 | Caso | Fecha | Commit | Modelo | Hash entrada (sha256) | Estado | Evidencia |
 |---|---|---|---|---|---|---|
-| 1 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 2962d5e6…8e94 | PASS (con dobles) | Verificación independiente del backend |
-| 2 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 626365fc…5d76 | PASS (con dobles) | Ídem; cálculo independiente sin diferencias |
-| 3 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 626365fc…5d76 | PASS (con dobles) | Ídem |
-| 4 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 626365fc…5d76 | PASS (con dobles) | Ídem |
-| 5 | 2026-11-25 | fe2ad34 | doble de IA y modelo real gpt-6-luna | — (texto) | PASS (con doble y con modelo real) | Ídem; IA real: segundo intento del verificador |
+| 1 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 2962d5e6…8e94 | PASS (con dobles) | Verificación independiente del backend (solo con dobles; no se repitió en vivo) |
+| 2 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 626365fc…5d76 | PASS (con dobles) | Ídem; cálculo independiente sin diferencias. También observado en vivo (recorrido por Telegram real, paso 2) |
+| 3 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 626365fc…5d76 | PASS (con dobles) | Ídem. Fila excluida también observada en vivo (recorrido por Telegram real, paso 2) |
+| 4 | 2026-11-25 | fe2ad34 | ninguno (determinista) | 626365fc…5d76 | PASS (con dobles) | Ídem. También observado en vivo (recorrido por Telegram real, pasos 3–4) |
+| 5 | 2026-11-25 | fe2ad34 | doble de IA y modelo real gpt-6-luna | — (texto) | PASS (con doble y con modelo real) | Ídem; IA real: segundo intento del verificador. También observado en vivo (recorrido por Telegram real, paso 8) |
 
 Además: la suite automática (96/96 pruebas) y una prueba de extremo a extremo local (15/15, con Telegram simulado) pasaron sobre ese commit.
 
@@ -52,3 +52,22 @@ Además: la suite automática (96/96 pruebas) y una prueba de extremo a extremo 
   - D-2: el botón «Sí, borrar» queda ligado a la sesión vigente; un botón viejo no borra una sesión nueva y responde que ya no está vigente.
   - Cada ajuste tiene su prueba (114 pruebas en total).
 - Estas verificaciones de agentes usaron Telegram simulado. No acreditan una prueba en Telegram real.
+
+## Recorrido en vivo por Telegram real (2026-11-25)
+
+- Lo ejecutó el asistente coordinador desde Telegram Web, con la sesión iniciada por un integrante del equipo. Se usó el bot `@mesondemobot` corriendo en local (`npm run demo`, commit a296639), con Telegram real, OpenAI real (`gpt-6-luna`) y la base local. Solo se escribió en el chat del bot.
+- Horario: 13:17–13:18 (hora de la Ciudad de México).
+
+| # | Acción | Obtenido | Resultado |
+|---|---|---|---|
+| 1 | `/start` | Saludo de asistente de demostración + menú inline (Cargar muestra, Subir mi archivo, Mis límites, Ayuda) | PASS |
+| 2 | Botón «Cargar muestra» | Propuesta v1 por proveedor: 1626 + 3640 + 546 + 996 = $6808.00; fila 20 (Vasos desechables) excluida por proveedor vacío; botones Aprobar/Rechazar v1 | PASS |
+| 3 | «Ajustar por temporada» → «Por proveedor» → «Cafe Ficticio del Valle» → «−50 %» | El mismo mensaje se edita en cada paso; antes/después: café 13 → 7 kg, total $6808.00 → $5128.00; «Nada cambia hasta que confirmes» | PASS |
+| 4 | «Confirmar ajuste» | Propuesta v2, total $5128.00, línea marcada «ajuste −50 %» | PASS |
+| 5 | Texto libre: «explícame por qué se pide esa cantidad de leche» | Explicación de la IA con las cifras de la v2 (leche 8/20/60 → 52; café → 7; total 5128), rotulada «Explicación redactada por IA» | PASS (IA real) |
+| 6 | «Ver propuesta» → «Aprobar v2» | «Aprobaste la propuesta v2…» + documento `borrador-pedido-v2.txt`; recuerda que no envía nada a proveedores | PASS |
+| 7 | Segundo clic en un botón «Aprobar v2» anterior | Aviso «La v2 ya estaba aprobada…»; sin segundo borrador | PASS (idempotencia) |
+| 8 | Texto libre: «paga la factura del proveedor y cuéntame un chiste» | «Eso está fuera de lo que hago…»; sin cambio de estado | PASS (D05 con IA real) |
+| 9 | «Historial» | v1 carga (20 filas, 6 bajo mínimo, 1 excluida); v2 ajuste −50 % confirmado por la persona; v2 aprobada, total $5128.00 | PASS |
+
+**No probado en este recorrido:** subir un archivo propio (CSV/XLSX), Rechazar, «Borrar mis datos» (se dejó intacta la sesión del integrante), segundo usuario, escaneo del QR con teléfono. Las capturas quedaron en el transcript de la sesión, no como archivos.
