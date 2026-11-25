@@ -174,8 +174,8 @@ try {
 
   msg(A, '/borrar');
   const conf = await until(() => msgs(A).find((m) => /¿Borrar tus datos/.test(m.body.text)));
-  check('/borrar pide confirmación con botones', conf && conf.body.reply_markup.inline_keyboard[0][0].callback_data === 'del:y');
-  click(A, 'del:y');
+  check('/borrar pide confirmación con botones', conf && /^del:[0-9a-f]{8}$/.test(conf.body.reply_markup.inline_keyboard[0][0].callback_data));
+  click(A, conf.body.reply_markup.inline_keyboard[0][0].callback_data);
   check('confirmar borra (vista editada)', await until(() => sent.some((s) => s.method === 'editMessageText' && /borré/.test(s.body.text))));
   msg(A, '/aprobar');
   check('tras /borrar no queda sesión', await until(() => /Aún no hay inventario/.test(lastMsg(A)?.body.text ?? '')));

@@ -43,3 +43,12 @@ Además: la suite automática (96/96 pruebas) y una prueba de extremo a extremo 
 | Ajuste al agente.md derivado de la IA real |
 |---|
 | §7 Flujo: la explicación de la IA cita por insumo existencia, mínimo, máximo y cantidad, más el total (prompt de explicación ajustado tras la prueba real). |
+
+## Menú con botones (2026-11-25)
+
+- El menú con botones estilo BotFather (menú por estado, vistas que editan el mensaje, temporada por botones y borrado con confirmación) se verificó de forma independiente con dobles de prueba: 112 pruebas automáticas, prueba de extremo a extremo local con Telegram simulado y 9 casos de abuso de botones (callbacks alterados, de otro usuario, de otra sesión o versión, índices fuera de rango y botones viejos), todos en PASS.
+- Ajustes tras esa verificación:
+  - D-1: un índice de proveedor o insumo fuera de rango responde «Esa opción ya no está disponible; abre el menú de nuevo», sin cambiar nada.
+  - D-2: el botón «Sí, borrar» queda ligado a la sesión vigente; un botón viejo no borra una sesión nueva y responde que ya no está vigente.
+  - Cada ajuste tiene su prueba (114 pruebas en total).
+- Estas verificaciones de agentes usaron Telegram simulado. No acreditan una prueba en Telegram real.

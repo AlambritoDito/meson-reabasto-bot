@@ -27,7 +27,7 @@ export const CALLBACK_PATTERNS: RegExp[] = [
   /^m:(home|load|upl|alr|prop|exp|tmp|dl|his|lim|del|help)$/,
   /^(ap|rj):[0-9a-f]{8}:\d{1,6}$/,
   /^a[jc]:[0-9a-f]{8}$/,
-  /^del:y$/,
+  /^del:([0-9a-f]{8}|-)$/,
   /^tg:[0-9a-f]{8}:\d{1,6}$/,
   /^tl:[0-9a-f]{8}:\d{1,6}:[pi]:\d{1,3}$/,
   /^tx:[0-9a-f]{8}:\d{1,6}:[pi]:\d{1,3}$/,
@@ -258,9 +258,10 @@ export function previewView(pv: AdjustmentPreview, nonce: string): View {
   return { html: previewHtml(pv), kb: [[b('✅ Confirmar ajuste', `aj:${nonce}`), b('« Cancelar', `ac:${nonce}`)]] };
 }
 
-export function deleteConfirmView(): View {
+/** El botón de confirmar va ligado a la sesión vigente («-» si no hay sesión). */
+export function deleteConfirmView(sessionId: string | null): View {
   return {
     html: '🗑️ <b>¿Borrar tus datos de esta demo?</b>\nSe eliminan tu inventario, propuestas e historial. No se puede deshacer.',
-    kb: [[b('🗑️ Sí, borrar', 'del:y'), b('« Cancelar', 'm:home')]],
+    kb: [[b('🗑️ Sí, borrar', `del:${sessionId ?? '-'}`), b('« Cancelar', 'm:home')]],
   };
 }

@@ -70,6 +70,8 @@ const defaultRandomId = () => {
 
 const REJECTED_NEXT = (v: number) =>
   `❌ Rechazaste la propuesta v${v}. No genero borrador. Para una nueva propuesta: ajusta por temporada, carga la muestra o sube otro inventario.`;
+// D-1: índice fuera de rango (no es un problema de versión).
+const OPTION_GONE = 'Esa opción ya no está disponible; abre el menú de nuevo.';
 const NOT_CURRENT = (v: number, cur: number) => `Esta versión (v${v}) ya no está vigente. La vigente es v${cur}.`;
 
 function aiFailText(e: unknown): string {
@@ -153,7 +155,7 @@ class Bot {
     const name = cmd?.[1]?.toLowerCase();
     const args = (cmd?.[2] ?? '').trim();
 
-    if (name === 'borrar') return this.show(chatId, deleteConfirmView());
+    if (name === 'borrar') return this.show(chatId, deleteConfirmView((await this.d.store.getSession(chatId))?.sessionId ?? null));
     if (!this.active) return this.show(chatId, { html: esc('Esta demo ya concluyó. Puedes usar /borrar para eliminar tus datos.') });
 
     if (m.document) return this.onDocument(chatId, m.document);
@@ -386,13 +388,19 @@ class Bot {
     const chatId = chat.id;
     const data = q.data ?? '';
     if (!isKnownCallback(data)) return this.ack('Botón no válido.');
-    if (!this.active && data !== 'del:y' && data !== 'm:del') return this.ack('La demo concluyó.');
+    if (!this.active && !data.startsWith('del:') && data !== 'm:del') return this.ack('La demo concluyó.');
     // Las vistas editan el mensaje donde se pulsó el botón.
     if (q.message?.message_id !== undefined) this.target = { chatId, messageId: q.message.message_id };
 
     let m: RegExpExecArray | null;
     if ((m = /^m:(\w+)$/.exec(data))) return this.onMenu(chatId, m[1]);
-    if (data === 'del:y') {
+    if ((m = /^del:([0-9a-f]{8}|-)$/.exec(data))) {
+      // D-2: solo borra si el botón corresponde a la sesión vigente; un botón viejo no borra una sesión nueva.
+      const cur = (await this.d.store.getSession(chatId))?.sessionId ?? '-';
+      if (m[1] !== cur) {
+        this.target = null;
+        return this.ack('Este botón ya no está vigente; abre el menú de nuevo. No borré nada.');
+      }
       await this.d.store.deleteChat(chatId);
       await this.ack('Datos borrados.');
       return this.show(chatId, { html: '✅ Listo: borré tu inventario, propuestas e historial de esta demo.', kb: menuKeyboard('vacia') });
@@ -438,7 +446,7 @@ class Bot {
       case 'lim':
         return this.cmdLimites(chatId);
       case 'del':
-        return this.show(chatId, deleteConfirmView());
+        return this.show(chatId, deleteConfirmView((await this.d.store.getSession(chatId))?.sessionId ?? null));
       case 'help':
         return this.show(chatId, helpView());
     }
@@ -454,13 +462,13 @@ class Bot {
     const resolve = (k: 'p' | 'i') => targetsOf(p, k)[idx];
     if (op === 'x' && (kind === 'p' || kind === 'i')) {
       const label = resolve(kind);
-      if (label === undefined) return this.ack(NOT_CURRENT(version, s.version));
+      if (label === undefined) return this.ack(OPTION_GONE);
       return this.show(chatId, tempPctView(s, kind, idx, label));
     }
     if (op === 'p' && kind && pct) {
       if (kind === 'g') return this.startAdjust(chatId, { scope: 'global', pct: Number(pct) });
       const label = resolve(kind);
-      if (label === undefined) return this.ack(NOT_CURRENT(version, s.version));
+      if (label === undefined) return this.ack(OPTION_GONE);
       return this.startAdjust(chatId, { scope: kind === 'p' ? 'proveedor' : 'insumo', target: label, pct: Number(pct) });
     }
     return this.ack('Botón no válido.');

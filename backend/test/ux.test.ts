@@ -145,7 +145,7 @@ describe('temporada sin teclear (botones)', () => {
     // índice fuera de rango o de otro chat: no se resuelve
     const sid = (app.db.db.prepare('SELECT session_id FROM sessions WHERE chat_id = ?').get(A) as { session_id: string }).session_id;
     await app.click(A, `tx:${sid}:1:i:99`);
-    expect(app.tg.last('callback')!.text).toMatch(/ya no está vigente/);
+    expect(app.tg.last('callback')!.text).toBe('Esa opción ya no está disponible; abre el menú de nuevo.'); // D-1
     await app.msg(B, '/muestra');
     await app.click(B, `tp:${sid}:1:i:0:+10`); // B usa el id de sesión de A
     expect(app.tg.last('callback')!.text).toMatch(/ya no existe/);
@@ -170,7 +170,7 @@ describe('borrar con confirmación', () => {
     await app.click(A, 'm:home');
     expect(ver(app)).toBe(1);
     await app.click(A, 'm:del');
-    await app.click(A, 'del:y');
+    await app.click(A, app.tg.last('message')!.keyboard![0][0].callback_data);
     expect(ver(app)).toBeUndefined();
     expect(datas(app.tg.last('message')!.keyboard)).toEqual(['m:load', 'm:upl', 'm:lim', 'm:help']);
   });
@@ -181,7 +181,7 @@ describe('seguridad de callbacks', () => {
     const app = makeApp();
     await app.msg(A, '/muestra');
     const before = app.db.snapshot();
-    for (const d of ['m:hack', 'tp:10000001:1:g:0:+15', 'tp:10000001:1:g:0:+500', 'del:yes', 'x'.repeat(65), 'm:home; DROP']) {
+    for (const d of ['m:hack', 'tp:10000001:1:g:0:+15', 'tp:10000001:1:g:0:+500', 'del:yes', 'del:y', 'x'.repeat(65), 'm:home; DROP']) {
       await app.click(A, d);
       expect(app.tg.last('callback')!.text).toBe('Botón no válido.');
     }
@@ -228,5 +228,36 @@ describe('HTML seguro', () => {
     expect(out.length).toBeLessThanOrEqual(4000);
     expect(() => assertValidHtml(out)).not.toThrow();
     expect(out).toMatch(/mensaje recortado/);
+  });
+});
+
+describe('defectos de verificación D-1 y D-2', () => {
+  it('D-1: índice fuera de rango responde aviso propio sin cambiar estado', async () => {
+    const app = makeApp();
+    await app.msg(A, '/muestra');
+    const sid = (app.db.db.prepare('SELECT session_id FROM sessions WHERE chat_id = ?').get(A) as { session_id: string }).session_id;
+    const before = app.db.snapshot();
+    for (const d of [`tx:${sid}:1:p:42`, `tp:${sid}:1:i:42:-10`]) {
+      await app.click(A, d);
+      expect(app.tg.last('callback')!.text).toBe('Esa opción ya no está disponible; abre el menú de nuevo.');
+    }
+    expect(app.db.snapshot()).toBe(before);
+  });
+  it('D-2: «Sí, borrar» viejo no borra una sesión nueva', async () => {
+    const app = makeApp();
+    await app.msg(A, '/muestra');
+    await app.click(A, 'm:del');
+    const oldDel = app.tg.last('message')!.keyboard![0][0].callback_data;
+    expect(new TextEncoder().encode(oldDel).length).toBeLessThanOrEqual(64);
+    await app.msg(A, '/muestra'); // nueva sesión
+    await app.click(A, oldDel);
+    expect(app.tg.last('callback')!.text).toMatch(/ya no está vigente; abre el menú de nuevo\. No borré nada/);
+    expect(ver(app)).toBe(1);
+    // y un botón sin sesión («-») tampoco borra si ahora hay sesión
+    await app.click(A, 'del:-');
+    expect(ver(app)).toBe(1);
+    await app.click(A, 'm:del');
+    await app.click(A, app.tg.last('message')!.keyboard![0][0].callback_data);
+    expect(ver(app)).toBeUndefined();
   });
 });

@@ -278,8 +278,9 @@ describe('borrado, retención y fecha de corte', () => {
     await app.msg(B, '/muestra');
     await app.msg(A, '/borrar');
     expect(verRow(app, A)).toBeDefined(); // primero pide confirmación con botones
-    expect(app.tg.last('message')!.keyboard![0].map((x) => x.callback_data)).toEqual(['del:y', 'm:home']);
-    await app.click(A, 'del:y');
+    const delBtn = app.tg.last('message')!.keyboard![0].map((x) => x.callback_data);
+    expect(delBtn).toEqual([`del:${verRow(app, A)!.session_id}`, 'm:home']);
+    await app.click(A, delBtn[0]);
     expect(verRow(app, A)).toBeUndefined();
     expect(app.db.db.prepare('SELECT COUNT(*) n FROM history WHERE chat_id = ?').get(A)).toEqual({ n: 0 });
     expect(verRow(app, B)).toBeDefined();
@@ -304,7 +305,7 @@ describe('borrado, retención y fecha de corte', () => {
       expect(app.db.count('sessions')).toBe(0);
       await app.msg(A, '/borrar');
       expect(app.tg.last('message')!.text).toMatch(/¿Borrar tus datos/);
-      await app.click(A, 'del:y'); // la confirmación de borrado funciona aunque la demo haya concluido
+      await app.click(A, 'del:-'); // sin sesión: la confirmación funciona aunque la demo haya concluido
       expect(app.tg.last('message')!.text).toMatch(/borré/);
     }
   });
