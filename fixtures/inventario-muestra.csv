@@ -1,0 +1,21 @@
+insumo,unidad,existencia,minimo,maximo,proveedor,costo
+Leche entera,litro,8,20,60,Lacteos Ficticios SA,22.50
+Queso panela,kg,6,4,12,Lacteos Ficticios SA,95
+Yogur natural,litro,3,5,15,Lacteos Ficticios SA,38
+Crema acida,litro,5,3,10,Lacteos Ficticios SA,45
+Cafe en grano,kg,2,5,15,Cafe Ficticio del Valle,280
+Azucar,kg,10,10,30,Abarrotes Ficticios,24
+Harina de trigo,kg,15,10,40,Abarrotes Ficticios,18
+Arroz,kg,4,8,25,Abarrotes Ficticios,26
+Aceite vegetal,litro,9,6,20,Abarrotes Ficticios,42
+Frijol negro,kg,10,6,20,Abarrotes Ficticios,32
+Jitomate,kg,3,8,20,Verduras Ficticias Sur,28
+Cebolla blanca,kg,9,5,15,Verduras Ficticias Sur,22
+Lechuga,pieza,10,6,20,Verduras Ficticias Sur,15
+Aguacate,kg,2,4,10,Verduras Ficticias Sur,65
+Limon,kg,7,4,12,Verduras Ficticias Sur,30
+Pan de caja,pieza,8,6,20,Panaderia Imaginaria,48
+Bolillo,pieza,40,30,100,Panaderia Imaginaria,3.5
+Tortilla de harina,paquete,10,5,20,Panaderia Imaginaria,35
+Vasos desechables,paquete,6,4,15,,60
+Servilletas,paquete,12,10,30,Abarrotes Ficticios,25

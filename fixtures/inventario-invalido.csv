@@ -1,0 +1,8 @@
+insumo,unidad,existencia,minimo,maximo,proveedor,costo
+Leche entera,litro,-3,20,60,Lacteos Ficticios SA,22.50
+Queso panela,kg,seis,4,12,Lacteos Ficticios SA,95
+Yogur natural,litro,3,15,5,Lacteos Ficticios SA,38
+Arroz,kg,4,8,25,Abarrotes Ficticios,26
+Arroz,kg,6,8,25,Abarrotes Ficticios,26
+Jitomate,kg,3,8,20,Verduras Ficticias Sur,
+Aguacate,kg,2,4,10,Verduras Ficticias Sur,65

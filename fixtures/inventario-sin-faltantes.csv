@@ -1,0 +1,9 @@
+insumo,unidad,existencia,minimo,maximo,proveedor,costo
+Leche entera,litro,30,20,60,Lacteos Ficticios SA,22.50
+Queso panela,kg,6,4,12,Lacteos Ficticios SA,95
+Cafe en grano,kg,8,5,15,Cafe Ficticio del Valle,280
+Azucar,kg,10,10,30,Abarrotes Ficticios,24
+Arroz,kg,12,8,25,Abarrotes Ficticios,26
+Jitomate,kg,10,8,20,Verduras Ficticias Sur,28
+Aguacate,kg,5,4,10,Verduras Ficticias Sur,65
+Bolillo,pieza,40,30,100,Panaderia Imaginaria,3.5
