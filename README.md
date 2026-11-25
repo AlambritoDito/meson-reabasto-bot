@@ -3,7 +3,7 @@
 Bot de Telegram de demostración para el reabastecimiento de un restaurante, hecho como proyecto escolar. Revisa un inventario **100 % ficticio** contra mínimos, propone un pedido agrupado por proveedor y genera un borrador descargable del mensaje. Una persona ajusta por temporada, aprueba y es quien enviaría el pedido: **el bot nunca envía pedidos**.
 
 - Bot de la demo: [t.me/mesondemobot](https://t.me/mesondemobot). Solo responde durante las sesiones de demostración (hasta el 10 de diciembre de 2026), mientras corre en el equipo de la persona responsable. Fuera de ellas el chat abre, pero no hay respuesta.
-- Página explicativa: `site/` (para GitHub Pages; URL pendiente).
+- Página explicativa: [alambritodito.github.io/meson-reabasto-bot](https://alambritodito.github.io/meson-reabasto-bot/) (código en `site/`, publicada con GitHub Pages).
 - Documentación del agente: `docs/` (`agente.md` en versión de entrega del 2026-11-25; supuestos y pendientes en `docs/pendientes.md`).
 
 Este README está pensado para que cualquiera lo reproduzca en su computadora, a mano o con un asistente de programación (por ejemplo Claude Code o Codex): los pasos son comandos explícitos y no hay servicios ocultos.
