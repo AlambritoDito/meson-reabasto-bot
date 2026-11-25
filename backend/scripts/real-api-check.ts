@@ -49,7 +49,14 @@ const client = new OpenAiClient(
   (info) => rows.push({ ...info, caso: current }),
 );
 
+const STOP_CODES = ['credit_balance_exhausted', 'insufficient_quota', 'project_spend_limit_exceeded'];
+let stopped = false; // tras el primer 429 por saldo/tope no se hace ninguna llamada más
+
 async function run(caso: string, fn: () => Promise<{ valid: boolean; nota: string }>) {
+  if (stopped) {
+    rows.push({ caso, httpStatus: 0, ms: 0, valid: false, nota: 'no ejecutado: detenido tras 429 por saldo/tope de gasto' });
+    return;
+  }
   current = caso;
   const before = rows.length;
   try {
@@ -59,6 +66,11 @@ async function run(caso: string, fn: () => Promise<{ valid: boolean; nota: strin
     const nota = e instanceof Error ? e.message : 'error';
     if (rows.length > before) Object.assign(rows[rows.length - 1], { valid: false, nota });
     else rows.push({ caso, httpStatus: 0, ms: 0, valid: false, nota });
+  }
+  const last = rows[rows.length - 1];
+  if (last && last.httpStatus === 429 && STOP_CODES.includes(last.errorCode ?? '')) {
+    stopped = true;
+    console.log(`OPENAI detenido: 429 ${last.errorCode}; no se harán más llamadas.`);
   }
 }
 
