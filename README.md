@@ -19,9 +19,9 @@ Este README está pensado para que cualquiera lo reproduzca en su computadora, a
 |---|---|---|
 | Programa (código) | Valida el archivo, compara existencia contra mínimo, calcula cantidades, agrupa por proveedor, genera el borrador con una plantilla fija, aplica límites, guarda estados e historial | Decidir por la persona |
 | IA (OpenAI por API oficial con clave, modelo `gpt-6-luna`) | Clasifica la intención del texto libre (lista cerrada) y explica la propuesta con las cifras del programa | Calcular o cambiar cantidades, aprobar, escribir el borrador, enviar |
+| Persona | Informa la temporada, revisa, aprueba o rechaza con botones, y enviaría el pedido | — |
 
 > Conexión con la IA verificada el 2026-11-25 con el modelo gpt-6-luna; si la IA no está disponible o se agota el cupo, el bot responde con plantillas "(sin IA)". Los cálculos, la aprobación y el borrador no dependen de la IA.
-| Persona | Informa la temporada, revisa, aprueba o rechaza con botones, y enviaría el pedido | — |
 
 La regla de cálculo es una **propuesta para la demo, no política confirmada del restaurante**: un insumo entra al pedido si `existencia < mínimo`; cantidad = `máximo − existencia`, redondeada hacia arriba; el ajuste por temporada (−50 % a +50 %, global, por proveedor o por insumo) se redondea hacia arriba y nunca supera el máximo. Está en `backend/src/config.ts` y `backend/src/engine.ts`.
 
@@ -56,8 +56,10 @@ No hay servidor permanente: el bot existe mientras el proceso corre. Al cerrarlo
 - Git.
 - Telegram en el teléfono y un **bot propio** creado con @BotFather (`/newbot`), que te da su token. No reutilices el token de otro bot ni el de la demo.
 - Una **clave de API de OpenAI** de un proyecto con **tope duro de gasto** configurado en el panel de OpenAI. Las consultas se cobran por uso a quien pone la clave. El bot usa el modelo `gpt-6-luna` mediante la Responses API; se cambia con `OPENAI_MODEL` en `.dev.vars`.
-  Conexión con la IA verificada el 2026-11-25 con el modelo gpt-6-luna; si la IA no está disponible o se agota el cupo, el bot responde con plantillas "(sin IA)".
 - No hace falta cuenta de Cloudflare para correrlo en local.
+- Para la suite (`npm test`) y el recorrido local (`npm run e2e:local`) **no hacen falta credenciales ni bot propio**: Telegram e IA se simulan. El bot propio y la clave solo se necesitan para `npm run demo`.
+- `npm ci` descarga SheetJS (`xlsx` 0.20.3) desde `cdn.sheetjs.com`, fuera del registro de npm; la red debe permitir ese dominio.
+- Plataforma: probado en macOS (Apple Silicon) con Node 24; no probado en Windows ni Linux. Los scripts de arranque y apagado usan señales a grupos de procesos y pueden no funcionar en Windows.
 
 ## Arranque local
 
@@ -76,13 +78,15 @@ cp .dev.vars.example .dev.vars
 #   DEMO_UNTIL=2026-12-10      fecha fin de la demo (hasta el final de ese día, hora de CDMX; obligatorio)
 #   MAX_AI_CALLS_TOTAL=1000    tope total de consultas a la IA de toda la demo
 
-npm test                            # suite automatizada (no consume IA)
+npm test                            # suite automatizada: sin credenciales, sin bot, sin IA
 npm run typecheck
-npm run e2e:local                   # recorrido local con un Telegram FALSO y sin IA (no contacta servicios reales)
+npm run e2e:local                   # recorrido local con Telegram SIMULADO y sin IA: no necesita .dev.vars ni contacta servicios reales
 npm run demo                        # aplica migraciones D1 locales, levanta wrangler dev y el poller
 ```
 
 Con la demo encendida, abre tu bot en Telegram y escribe `/start`: aparece un menú con botones (estilo BotFather) que solo muestra lo que tiene sentido en cada momento. «📦 Cargar muestra» carga el inventario ficticio. La propuesta trae «✅ Aprobar» y «❌ Rechazar»: aprobar envía el borrador como archivo de texto; rechazar lo registra y no genera borrador. «🌦️ Ajustar por temporada» se hace con botones (alcance y porcentaje), con antes/después y confirmación, y «🗑️ Borrar mis datos» pide confirmación. Los comandos (`/muestra`, `/temporada -10`, `/aprobar`, `/borrador`, `/historial`, `/limites`, `/borrar`, `/ayuda`, `/menu`) siguen funcionando. Al arrancar, `npm run demo` registra en Telegram el menú de comandos y la descripción del bot.
+
+**Puertos.** `npm run demo` levanta el Worker local en `127.0.0.1:8787`; se cambia con la variable de entorno `PORT` (por ejemplo `PORT=8788 npm run demo`). `npm run e2e:local` usa `127.0.0.1:8797`; se cambia con `E2E_PORT` (por ejemplo `E2E_PORT=8798 npm run e2e:local`). Si el puerto está ocupado, el arranque falla: revisa qué lo usa (`lsof -i :8787` en macOS/Linux), detén una demo previa con `npm run stop` o elige otro puerto con esas variables.
 
 Solo un proceso puede leer las actualizaciones de un bot a la vez: `npm run demo` se niega a arrancar si ya hay otra demo registrada, y el poller elimina cualquier webhook previo del bot al iniciar. `npm run db:migrate:local` aplica las migraciones por separado si lo necesitas.
 

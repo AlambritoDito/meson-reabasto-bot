@@ -3,96 +3,130 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agente de reabastecimiento · demostración con datos ficticios</title>
-  <meta name="description" content="Bot de Telegram de demostración que revisa un inventario ficticio contra mínimos, propone un pedido por proveedor y redacta un borrador. Una persona revisa y aprueba; el bot nunca envía pedidos.">
+  <title>MesonBot · agente de reabastecimiento (demo con datos ficticios)</title>
+  <meta name="description" content="Bot de Telegram de demostración que revisa un inventario ficticio contra mínimos, propone un pedido por proveedor y prepara un borrador. Una persona revisa y aprueba; el bot nunca envía pedidos.">
   <meta name="color-scheme" content="light dark">
   <meta name="referrer" content="no-referrer">
   <link rel="stylesheet" href="estilos.css">
+  <script src="app.js"></script>
 </head>
 <body>
   <a class="saltar" href="#contenido">Saltar al contenido</a>
 
   <header class="cabecera">
     <div class="envoltura cabecera__fila">
-      <p class="marca">Agente de reabastecimiento <span class="marca__nota">demo</span></p>
-      <nav aria-label="Secciones de la página">
+      <a class="marca" href="#titulo">MesonBot <span class="marca__nota">demo</span></a>
+      <nav class="nav" aria-label="Secciones de la página">
         <ul class="menu">
-          <li><a href="#problema">Problema</a></li>
-          <li><a href="#recorrido">Recorrido</a></li>
-          <li><a href="#roles">Quién hace qué</a></li>
-          <li><a href="#probar">Probar</a></li>
-          <li><a href="#privacidad">Privacidad</a></li>
-          <li><a href="#correlo">Córrelo tú</a></li>
+          <li><a href="#problema"><span aria-hidden="true">01</span> Problema</a></li>
+          <li><a href="#recorrido"><span aria-hidden="true">02</span> Recorrido</a></li>
+          <li><a href="#roles"><span aria-hidden="true">03</span> Quién hace qué</a></li>
+          <li><a href="#probar"><span aria-hidden="true">04</span> Probar</a></li>
+          <li><a href="#privacidad"><span aria-hidden="true">05</span> Privacidad</a></li>
+          <li><a href="#correlo"><span aria-hidden="true">06</span> Córrelo tú</a></li>
         </ul>
       </nav>
+      <a class="boton boton--chico cabecera__cta" href="https://t.me/mesondemobot" rel="noopener">Abrir en Telegram</a>
     </div>
   </header>
 
   <main id="contenido" tabindex="-1">
     <section class="portada" aria-labelledby="titulo">
+      <div class="portada__fondo" aria-hidden="true"><i></i><i></i></div>
       <div class="envoltura portada__rejilla">
         <div class="portada__texto">
           <p class="etiqueta">Proyecto escolar · Telegram · inventario 100 % ficticio</p>
-          <h1 id="titulo">Del inventario exportado a un borrador de pedido que una persona aprueba</h1>
+          <h1 id="titulo">Del inventario exportado a un borrador de pedido que <span class="resalta">una persona aprueba</span></h1>
           <p class="entrada">MesonBot es un bot de Telegram de demostración para el reabastecimiento de un restaurante. Revisa un inventario ficticio contra sus mínimos, propone cuánto pedir a cada proveedor y prepara el borrador del mensaje. Quien decide y quien enviaría el pedido es siempre una persona: <strong>el bot nunca envía pedidos</strong>.</p>
-        </div>
-        <aside class="tarjeta-bot" aria-labelledby="t-tarjeta">
-          <h2 id="t-tarjeta" class="tarjeta-bot__titulo">Pruébalo en Telegram</h2>
+
           <div class="aviso aviso--pendiente" data-bloque="aviso-pendiente" hidden>
             <p><strong>Enlace al bot pendiente de configurar.</strong> Aquí aparecerán el QR y el botón cuando exista un enlace verificado.</p>
           </div>
-          <div class="tarjeta-bot__cuerpo" data-bloque="enlace-bot">
-            <p><a class="boton boton--ancho" href="https://t.me/mesondemobot" rel="noopener">Abrir en Telegram</a></p>
-            <figure class="qr">
-              <img src="qr.svg" width="168" height="168" alt="Código QR que abre el bot @mesondemobot en Telegram">
-              <figcaption>O escanea con la cámara de otro teléfono.</figcaption>
-            </figure>
-            <p class="tarjeta-bot__enlace">Enlace: <a class="enlace-texto" href="https://t.me/mesondemobot" rel="noopener">t.me/mesondemobot</a></p>
+          <div class="portada__cta" data-bloque="enlace-bot">
+            <p class="portada__botones">
+              <a class="boton boton--claro" href="https://t.me/mesondemobot" rel="noopener">Abrir en Telegram <span aria-hidden="true">→</span></a>
+              <a class="boton boton--contorno" href="#recorrido">Ver el recorrido</a>
+            </p>
+            <div class="qr-mini">
+              <figure class="qr">
+                <img src="qr.svg" width="112" height="112" alt="Código QR que abre el bot @mesondemobot en Telegram">
+              </figure>
+              <p>Escanea con la cámara de otro teléfono o usa el enlace <a class="enlace-texto" href="https://t.me/mesondemobot" rel="noopener">t.me/mesondemobot</a>.</p>
+            </div>
           </div>
-          <p class="tarjeta-bot__nota"><strong>Solo responde durante las sesiones de demostración</strong> (hasta el 10 de diciembre de 2026). Fuera de ellas el chat abre, pero no hay respuesta. <a href="#probar">Detalles y comandos</a></p>
-        </aside>
-        <p class="acciones portada__acciones">
-          <a class="boton boton--secundario" href="#recorrido">Ver el recorrido</a>
-          <a class="boton boton--secundario" href="#roles">Qué hace cada parte</a>
-        </p>
+          <p class="portada__sesiones"><span class="punto" aria-hidden="true"></span><strong>Solo responde durante las sesiones de demostración</strong> (hasta el 10 de diciembre de 2026). Fuera de ellas el chat abre, pero no hay respuesta. <a href="#probar">Detalles y comandos</a></p>
+        </div>
+
+        <figure class="chat" aria-labelledby="chat-pie">
+          <div class="chat__barra" aria-hidden="true">
+            <span class="chat__avatar">M</span>
+            <span><b>MesonBot</b><small>bot</small></span>
+          </div>
+          <ol class="chat__mensajes" data-secuencia>
+            <li class="msg msg--yo"><span class="msg__btn-usado">📦 Cargar muestra</span></li>
+            <li class="msg msg--bot">
+              <p><b>Lacteos Ficticios SA</b> — subtotal $1626.00<br>• Leche entera: tiene 8, mín 20, máx 60 → pedir <b>52 litro</b><br>• Yogur natural: tiene 3, mín 5, máx 15 → pedir <b>12 litro</b></p>
+              <p><b>Verduras Ficticias Sur</b> — subtotal $996.00<br>• Jitomate: tiene 3, mín 8, máx 20 → pedir <b>17 kg</b><br>• Aguacate: tiene 2, mín 4, máx 10 → pedir <b>8 kg</b></p>
+              <p class="msg__tenue">… y 2 proveedores más. <b>Total estimado: $6808.00</b></p>
+              <p class="msg__aviso">⚠️ Fila 20 (Vasos desechables): proveedor vacío; no invento valores.</p>
+            </li>
+            <li class="msg msg--botones" aria-label="Botones del mensaje">
+              <span class="tg-btn tg-btn--activo">✅ Aprobar v1</span><span class="tg-btn">❌ Rechazar v1</span>
+              <span class="tg-btn tg-btn--ancho">🌦️ Ajustar por temporada</span>
+            </li>
+            <li class="msg msg--bot"><p>✅ Aprobaste la propuesta v1. Te envío el borrador. Recuerda: yo no envío nada a proveedores; tú decides si lo mandas.</p></li>
+            <li class="msg msg--bot msg--archivo"><span class="archivo__icono" aria-hidden="true">txt</span><span><b>borrador-pedido-v1.txt</b><small>Borrador (datos ficticios). No se envió nada a proveedores.</small></span></li>
+          </ol>
+          <figcaption id="chat-pie" class="chat__pie">Ejemplo ilustrativo con datos ficticios del inventario de muestra (no es una captura). Abajo hay capturas reales.</figcaption>
+        </figure>
+      </div>
+      <div class="envoltura">
         <p class="portada__aviso">Proyecto académico independiente. No es un sitio oficial del Mesón; colores inspirados en su identidad pública.</p>
       </div>
     </section>
 
     <section id="problema" class="seccion" aria-labelledby="t-problema">
-      <div class="envoltura">
-        <h2 id="t-problema">El problema</h2>
-        <p>En el caso de clase, el restaurante usa un módulo de inventarios que no ofrece conexión directa con otros sistemas: avisa por correo y permite exportar el inventario a Excel. Revisar esa hoja a mano para detectar qué falta y armar el pedido de cada proveedor toma tiempo, y los faltantes se notan tarde.</p>
-        <p>Además, el consumo cambia según la temporada (vacaciones, exámenes, eventos). Un programa no puede saberlo por sí solo; por eso una persona informa esos cambios y autoriza cada pedido.</p>
-        <p class="nota">Esta demo no mide ni promete ahorros ni reducción de faltantes: trabaja con datos inventados para mostrar el flujo.</p>
+      <div class="envoltura dos-columnas">
+        <div class="revelar">
+          <p class="kicker">01 · Problema</p>
+          <h2 id="t-problema">El problema</h2>
+        </div>
+        <div class="revelar">
+          <p>En el caso de clase, el restaurante usa un módulo de inventarios que no ofrece conexión directa con otros sistemas: avisa por correo y permite exportar el inventario a Excel. Revisar esa hoja a mano para detectar qué falta y armar el pedido de cada proveedor toma tiempo, y los faltantes se notan tarde.</p>
+          <p>Además, el consumo cambia según la temporada (vacaciones, exámenes, eventos). Un programa no puede saberlo por sí solo; por eso una persona informa esos cambios y autoriza cada pedido.</p>
+          <p class="nota">Esta demo no mide ni promete ahorros ni reducción de faltantes: trabaja con datos inventados para mostrar el flujo.</p>
+        </div>
       </div>
     </section>
 
     <section id="recorrido" class="seccion seccion--alterna" aria-labelledby="t-recorrido">
       <div class="envoltura">
-        <h2 id="t-recorrido">Recorrido paso a paso</h2>
-        <ol class="pasos">
-          <li>
+        <div class="revelar">
+          <p class="kicker">02 · Recorrido</p>
+          <h2 id="t-recorrido">Recorrido paso a paso</h2>
+        </div>
+        <ol class="linea">
+          <li class="linea__paso revelar">
             <h3>Carga el inventario</h3>
             <p>Escribe <code>/start</code> y usa los botones del menú: «📦 Cargar muestra» carga el inventario ficticio de ejemplo y «📄 Subir mi archivo» explica cómo enviar un CSV o XLSX. No necesitas memorizar comandos.</p>
           </li>
-          <li>
+          <li class="linea__paso revelar">
             <h3>El programa revisa</h3>
             <p>Valida cada fila, señala los datos faltantes o inválidos y marca los insumos con existencia por debajo del mínimo.</p>
           </li>
-          <li>
+          <li class="linea__paso revelar">
             <h3>Pedido propuesto por proveedor</h3>
             <p>Calcula la cantidad sugerida de cada insumo y la agrupa por proveedor.</p>
           </li>
-          <li>
+          <li class="linea__paso revelar">
             <h3>Pregunta lo que necesites</h3>
             <p>Con «💬 Explicar» la IA explica en lenguaje sencillo por qué entra cada insumo, citando sus cifras; también puedes escribir en texto libre y la IA interpreta qué quieres hacer.</p>
           </li>
-          <li>
+          <li class="linea__paso revelar">
             <h3>Ajusta por temporada</h3>
             <p>Con «🌦️ Ajustar por temporada» eliges con botones a qué aplicarlo (todo, un proveedor o un insumo) y el porcentaje. El bot muestra el antes y el después, nunca propone más allá del máximo y te pide confirmar.</p>
           </li>
-          <li>
+          <li class="linea__paso revelar">
             <h3>Aprueba o rechaza tu simulación</h3>
             <p>La propuesta trae los botones <strong>✅ Aprobar</strong> y <strong>❌ Rechazar</strong>. Si apruebas, recibes el borrador como archivo de texto (después, «⬇️ Descargar borrador»); si rechazas, no se genera borrador. El borrador lo enviaría una persona; el bot no lo hace.</p>
           </li>
@@ -102,11 +136,14 @@
 
     <section id="roles" class="seccion" aria-labelledby="t-roles">
       <div class="envoltura">
-        <h2 id="t-roles">Quién hace qué</h2>
-        <p>La responsabilidad está separada a propósito: las cifras y el borrador salen de reglas fijas, la IA solo interpreta y explica, y la decisión es humana.</p>
+        <div class="revelar">
+          <p class="kicker">03 · Quién hace qué</p>
+          <h2 id="t-roles">Quién hace qué</h2>
+          <p>La responsabilidad está separada a propósito: las cifras y el borrador salen de reglas fijas, la IA solo interpreta y explica, y la decisión es humana.</p>
+        </div>
         <p class="aviso aviso--pendiente" data-bloque="aviso-ia" hidden><strong>La conexión real con la IA aún no está verificada.</strong> Si no responde, verás plantillas «(sin IA)»; los cálculos, la aprobación y el borrador no dependen de la IA.</p>
         <div class="roles">
-          <article class="rol">
+          <article class="rol tarjeta revelar">
             <h3><span class="rol__clave" aria-hidden="true">1</span> El programa calcula</h3>
             <ul>
               <li>Valida columnas, datos vacíos e inválidos.</li>
@@ -116,7 +153,7 @@
               <li>Aplica límites de uso y lleva el estado del pedido.</li>
             </ul>
           </article>
-          <article class="rol">
+          <article class="rol tarjeta revelar">
             <h3><span class="rol__clave" aria-hidden="true">2</span> La IA interpreta y explica</h3>
             <ul>
               <li>Interpreta lo que escribes en texto libre.</li>
@@ -125,7 +162,7 @@
               <li>Si no está disponible, el bot responde con una plantilla marcada «(sin IA)».</li>
             </ul>
           </article>
-          <article class="rol">
+          <article class="rol tarjeta revelar">
             <h3><span class="rol__clave" aria-hidden="true">3</span> La persona decide</h3>
             <ul>
               <li>Informa el ajuste por temporada.</li>
@@ -140,9 +177,18 @@
 
     <section id="ejemplo" class="seccion seccion--alterna" aria-labelledby="t-ejemplo">
       <div class="envoltura">
-        <h2 id="t-ejemplo">Ejemplo con datos ficticios</h2>
-        <p class="aviso aviso--info"><strong>Regla propuesta para la demo, no política confirmada del restaurante:</strong> un insumo entra al pedido si su existencia es menor que su mínimo, y la cantidad sugerida es máximo − existencia.</p>
-        <div class="tabla-contenedor" role="region" aria-labelledby="cap-ejemplo" tabindex="0">
+        <div class="revelar">
+          <p class="kicker">Ejemplo</p>
+          <h2 id="t-ejemplo">Ejemplo con datos ficticios</h2>
+        </div>
+        <dl class="cifras revelar" aria-label="Inventario ficticio de muestra">
+          <div><dt>insumos en la muestra</dt><dd data-contar="20">20</dd></div>
+          <div><dt>proveedores ficticios</dt><dd data-contar="5">5</dd></div>
+          <div><dt>bajo su mínimo</dt><dd data-contar="6">6</dd></div>
+          <div><dt>fila excluida por dato faltante</dt><dd data-contar="1">1</dd></div>
+        </dl>
+        <p class="aviso aviso--info revelar"><strong>Regla propuesta para la demo, no política confirmada del restaurante:</strong> un insumo entra al pedido si su existencia es menor que su mínimo, y la cantidad sugerida es máximo − existencia.</p>
+        <div class="tabla-contenedor revelar" role="region" aria-labelledby="cap-ejemplo" tabindex="0">
           <table>
             <caption id="cap-ejemplo">Cuatro filas del inventario ficticio de muestra que carga <code>/muestra</code> (datos inventados, no de un restaurante real)</caption>
             <thead>
@@ -177,7 +223,7 @@
             </tbody>
           </table>
         </div>
-        <ul class="explicacion">
+        <ul class="explicacion revelar">
           <li><strong>Leche entera:</strong> 8 &lt; 20, entra al pedido; 60 − 8 = 52 litros.</li>
           <li><strong>Azucar:</strong> 10 no es menor que 10; justo en el mínimo, no se pide.</li>
           <li><strong>Jitomate:</strong> 3 &lt; 8, entra al pedido; 20 − 3 = 17 kg.</li>
@@ -187,35 +233,64 @@
       </div>
     </section>
 
-    <section id="probar" class="seccion" aria-labelledby="t-probar">
+    <section id="capturas" class="seccion" aria-labelledby="t-capturas">
       <div class="envoltura">
-        <h2 id="t-probar">Cómo probar la demo</h2>
+        <div class="revelar">
+          <p class="kicker">Capturas reales</p>
+          <h2 id="t-capturas">El bot en Telegram</h2>
+          <p>Capturas reales del recorrido en vivo del 25 de noviembre de 2026, con el inventario ficticio de muestra.</p>
+        </div>
+        <div class="galeria">
+          <figure class="tarjeta revelar">
+            <img src="img/01-menu-inicio.jpg" width="800" height="1010" loading="lazy" alt="Captura real: mensaje de bienvenida de MesonBot con los botones Cargar muestra, Subir mi archivo, Mis límites y Ayuda">
+            <figcaption>Menú de inicio · captura real del 25-nov-2026</figcaption>
+          </figure>
+          <figure class="tarjeta revelar">
+            <img src="img/02-propuesta-v1.jpg" width="800" height="1010" loading="lazy" alt="Captura real: propuesta v1 por proveedor con total estimado de $6808.00, la fila 20 excluida y los botones Aprobar v1 y Rechazar v1">
+            <figcaption>Propuesta por proveedor · captura real del 25-nov-2026</figcaption>
+          </figure>
+          <figure class="tarjeta revelar">
+            <img src="img/07-aprobacion-borrador.jpg" width="560" height="707" loading="lazy" alt="Captura real: confirmación de la propuesta v2 aprobada y archivo borrador-pedido-v2.txt">
+            <figcaption>Aprobación y borrador · captura real del 25-nov-2026</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
 
-        <p class="probar__accion"><a class="boton" href="https://t.me/mesondemobot" rel="noopener">Abrir @mesondemobot en Telegram</a> <span class="nota">o usa el QR de <a href="#titulo">arriba</a>.</span></p>
-        <p class="aviso aviso--info"><strong>El bot solo responde durante las sesiones de demostración.</strong> Corre en el equipo de la persona responsable únicamente mientras la demo está encendida, en sesiones hasta el 10 de diciembre de 2026. Fuera de ese horario el QR y el enlace abren el chat, pero no habrá respuesta. Si quieres probarlo cuando quieras, <a href="#correlo">córrelo tú mismo</a>.</p>
+    <section id="probar" class="seccion seccion--alterna" aria-labelledby="t-probar">
+      <div class="envoltura">
+        <div class="revelar">
+          <p class="kicker">04 · Probar</p>
+          <h2 id="t-probar">Cómo probar la demo</h2>
+        </div>
+        <p class="probar__accion revelar"><a class="boton" href="https://t.me/mesondemobot" rel="noopener">Abrir @mesondemobot en Telegram</a> <span class="nota">o usa el QR de <a href="#titulo">arriba</a>.</span></p>
+        <p class="aviso aviso--info revelar"><strong>El bot solo responde durante las sesiones de demostración.</strong> Corre en el equipo de la persona responsable únicamente mientras la demo está encendida, en sesiones hasta el 10 de diciembre de 2026. Fuera de ese horario el QR y el enlace abren el chat, pero no habrá respuesta. Si quieres probarlo cuando quieras, <a href="#correlo">córrelo tú mismo</a>.</p>
 
         <h3>Menú y comandos</h3>
         <p>Todo se hace con los botones del menú dentro del chat (como en BotFather). Los comandos son opcionales y también aparecen en el botón «Menú» de Telegram.</p>
         <dl class="comandos">
-          <div><dt><code>/start</code> · <code>/menu</code></dt><dd>Inicia tu sesión de demo y abre el menú con botones.</dd></div>
-          <div><dt><code>/ayuda</code></dt><dd>Ayuda y lista de comandos.</dd></div>
-          <div><dt><code>/muestra</code></dt><dd>Carga el inventario ficticio de ejemplo.</dd></div>
-          <div><dt>Archivo CSV o XLSX</dt><dd>Envíalo al chat para revisarlo (solo datos ficticios; máx. 200 KB y 500 filas, 5 archivos al día).</dd></div>
-          <div><dt><code>/explicar</code></dt><dd>Explicación del pedido propuesto.</dd></div>
-          <div><dt><code>/temporada</code></dt><dd>Ajuste por temporada en porcentaje (p. ej. <code>/temporada -10</code>), con confirmación.</dd></div>
-          <div><dt><code>/aprobar</code></dt><dd>Muestra la propuesta vigente con los botones Aprobar y Rechazar.</dd></div>
-          <div><dt><code>/borrador</code></dt><dd>Descarga el borrador (archivo de texto) del pedido aprobado.</dd></div>
-          <div><dt><code>/historial</code></dt><dd>Versiones, ajustes, aprobaciones y rechazos de tu sesión.</dd></div>
-          <div><dt><code>/limites</code></dt><dd>Cuánto uso de IA te queda hoy.</dd></div>
-          <div><dt><code>/borrar</code></dt><dd>Elimina los datos de tu sesión (pide confirmación).</dd></div>
+          <div class="tarjeta"><dt><code>/start</code> · <code>/menu</code></dt><dd>Inicia tu sesión de demo y abre el menú con botones.</dd></div>
+          <div class="tarjeta"><dt><code>/ayuda</code></dt><dd>Ayuda y lista de comandos.</dd></div>
+          <div class="tarjeta"><dt><code>/muestra</code></dt><dd>Carga el inventario ficticio de ejemplo.</dd></div>
+          <div class="tarjeta"><dt>Archivo CSV o XLSX</dt><dd>Envíalo al chat para revisarlo (solo datos ficticios; máx. 200 KB y 500 filas, 5 archivos al día).</dd></div>
+          <div class="tarjeta"><dt><code>/explicar</code></dt><dd>Explicación del pedido propuesto.</dd></div>
+          <div class="tarjeta"><dt><code>/temporada</code></dt><dd>Ajuste por temporada en porcentaje (p. ej. <code>/temporada -10</code>), con confirmación.</dd></div>
+          <div class="tarjeta"><dt><code>/aprobar</code></dt><dd>Muestra la propuesta vigente con los botones Aprobar y Rechazar.</dd></div>
+          <div class="tarjeta"><dt><code>/borrador</code></dt><dd>Descarga el borrador (archivo de texto) del pedido aprobado.</dd></div>
+          <div class="tarjeta"><dt><code>/historial</code></dt><dd>Versiones, ajustes, aprobaciones y rechazos de tu sesión.</dd></div>
+          <div class="tarjeta"><dt><code>/limites</code></dt><dd>Cuánto uso de IA te queda hoy.</dd></div>
+          <div class="tarjeta"><dt><code>/borrar</code></dt><dd>Elimina los datos de tu sesión (pide confirmación).</dd></div>
         </dl>
       </div>
     </section>
 
-    <section id="limites" class="seccion seccion--alterna" aria-labelledby="t-limites">
-      <div class="envoltura">
-        <h2 id="t-limites">Límites de la demo</h2>
-        <ul class="lista">
+    <section id="limites" class="seccion" aria-labelledby="t-limites">
+      <div class="envoltura dos-columnas">
+        <div class="revelar">
+          <p class="kicker">Límites</p>
+          <h2 id="t-limites">Límites de la demo</h2>
+        </div>
+        <ul class="lista revelar">
           <li><strong>Solo simulación.</strong> No hay compras, pagos ni envío a proveedores reales.</li>
           <li><strong>Cada visitante, su sesión.</strong> Aprobar solo afecta tu simulación; nadie ve los datos de otro chat.</li>
           <li><strong>Uso de IA limitado:</strong> 3 consultas por minuto y 20 por día por chat, y 300 por día en total. Los cupos diarios se reinician a las 00:00 UTC. Al agotarse, el bot sigue funcionando con plantillas «(sin IA)»; los cálculos los hace el programa, no la IA.</li>
@@ -226,57 +301,75 @@
       </div>
     </section>
 
-    <section id="privacidad" class="seccion" aria-labelledby="t-privacidad">
+    <section id="privacidad" class="seccion seccion--alterna" aria-labelledby="t-privacidad">
       <div class="envoltura">
-        <h2 id="t-privacidad">Privacidad</h2>
-        <p class="aviso aviso--alerta"><strong>Usa solo datos ficticios.</strong> Para interpretar lo que escribes y generar explicaciones, se envían a la API oficial de OpenAI tu texto (máx. 500 caracteres) y los datos del pedido calculado, incluidos nombres de insumos y proveedores, cifras y filas excluidas. Por eso solo deben cargarse datos inventados: nada de inventarios reales, nombres ni datos personales.</p>
+        <div class="revelar">
+          <p class="kicker">05 · Privacidad</p>
+          <h2 id="t-privacidad">Privacidad</h2>
+        </div>
+        <p class="aviso aviso--alerta revelar"><strong>Usa solo datos ficticios.</strong> Para interpretar lo que escribes y generar explicaciones, se envían a la API oficial de OpenAI tu texto (máx. 500 caracteres) y los datos del pedido calculado, incluidos nombres de insumos y proveedores, cifras y filas excluidas. Por eso solo deben cargarse datos inventados: nada de inventarios reales, nombres ni datos personales.</p>
         <p data-bloque="detalle-ia">Modelo de IA: OpenAI <code>gpt-6-luna</code>.</p>
         <dl class="definiciones">
-          <div><dt>Qué se guarda</dt><dd>El identificador numérico de tu chat (lo asigna Telegram), el inventario que cargues, los pedidos calculados, tus ajustes, aprobaciones y el conteo de uso de IA. No pedimos teléfono ni nombre.</dd></div>
-          <div><dt>Dónde y cuánto tiempo</dt><dd>En una base de datos local del equipo que corre la demo. Lo que tiene más de 7 días se elimina en la siguiente actividad del bot, y la base se borra al terminar el proyecto.</dd></div>
-          <div><dt>Cómo borrarlo</dt><dd>Toca «🗑️ Borrar mis datos» o escribe <code>/borrar</code> y confirma; se eliminan los datos de tu sesión en cualquier momento.</dd></div>
-          <div><dt>Esta página</dt><dd>No usa cookies, rastreadores, analíticas ni recursos externos.</dd></div>
+          <div class="tarjeta revelar"><dt>Qué se guarda</dt><dd>El identificador numérico de tu chat (lo asigna Telegram), el inventario que cargues, los pedidos calculados, tus ajustes, aprobaciones y el conteo de uso de IA. No pedimos teléfono ni nombre.</dd></div>
+          <div class="tarjeta revelar"><dt>Dónde y cuánto tiempo</dt><dd>En una base de datos local del equipo que corre la demo. Lo que tiene más de 7 días se elimina en la siguiente actividad del bot, y la base se borra al terminar el proyecto.</dd></div>
+          <div class="tarjeta revelar"><dt>Cómo borrarlo</dt><dd>Toca «🗑️ Borrar mis datos» o escribe <code>/borrar</code> y confirma; se eliminan los datos de tu sesión en cualquier momento.</dd></div>
+          <div class="tarjeta revelar"><dt>Esta página</dt><dd>No usa cookies, rastreadores, analíticas ni recursos externos.</dd></div>
         </dl>
       </div>
     </section>
 
-    <section id="pruebas" class="seccion seccion--alterna" aria-labelledby="t-pruebas">
-      <div class="envoltura">
-        <h2 id="t-pruebas">Pruebas</h2>
-        <p>Se definieron cinco casos: inventario sin faltantes, varios insumos bajo mínimo, un dato faltante, un ajuste por temporada y una petición fuera de alcance. Sus resultados se publican en el registro de pruebas del repositorio cuando se ejecutan; esta página no muestra resultados que no se hayan obtenido.</p>
-        <p data-bloque="enlace-repo"><a href="https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/registro-pruebas.md">Ver el registro de pruebas</a></p>
+    <section id="pruebas" class="seccion" aria-labelledby="t-pruebas">
+      <div class="envoltura dos-columnas">
+        <div class="revelar">
+          <p class="kicker">Pruebas</p>
+          <h2 id="t-pruebas">Pruebas</h2>
+        </div>
+        <div class="revelar">
+          <p>Se definieron cinco casos: inventario sin faltantes, varios insumos bajo mínimo, un dato faltante, un ajuste por temporada y una petición fuera de alcance. El registro de pruebas del repositorio explica cómo se ejecutaron (con dobles de prueba y un recorrido en vivo por Telegram) y qué se obtuvo; esta página no muestra resultados que no estén ahí.</p>
+          <p data-bloque="enlace-repo"><a href="https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/registro-pruebas.md">Ver el registro de pruebas</a></p>
+        </div>
       </div>
     </section>
 
-    <section id="correlo" class="seccion" aria-labelledby="t-correlo">
-      <div class="envoltura">
-        <h2 id="t-correlo">Córrelo tú mismo</h2>
-        <p>El proyecto está pensado para que cualquiera lo reproduzca en su computadora, también con ayuda de asistentes de programación. Necesitas Node.js, un bot propio creado con @BotFather y una clave de API de OpenAI con tope de gasto. Las consultas a la IA se cobran por uso a quien pone la clave; el código limita cuántas se hacen.</p>
-        <ol class="lista">
-          <li>Clona el repositorio e instala dependencias.</li>
-          <li>Copia el archivo de ejemplo de variables y pon tu token y tu clave (nunca los publiques).</li>
-          <li>Corre las pruebas automatizadas.</li>
-          <li>Arranca la demo; se detiene con Ctrl+C.</li>
-        </ol>
-        <p>Los comandos exactos están en el README del repositorio.</p>
-        <p data-bloque="enlace-repo"><a href="https://github.com/AlambritoDito/meson-reabasto-bot#readme">Abrir las instrucciones del README</a></p>
+    <section id="correlo" class="seccion seccion--alterna" aria-labelledby="t-correlo">
+      <div class="envoltura dos-columnas">
+        <div class="revelar">
+          <p class="kicker">06 · Córrelo tú</p>
+          <h2 id="t-correlo">Córrelo tú mismo</h2>
+        </div>
+        <div class="revelar">
+          <p>El proyecto está pensado para que cualquiera lo reproduzca en su computadora, también con ayuda de asistentes de programación. Necesitas Node.js, un bot propio creado con @BotFather y una clave de API de OpenAI con tope de gasto. Las consultas a la IA se cobran por uso a quien pone la clave; el código limita cuántas se hacen.</p>
+          <ol class="lista">
+            <li>Clona el repositorio e instala dependencias.</li>
+            <li>Copia el archivo de ejemplo de variables y pon tu token y tu clave (nunca los publiques).</li>
+            <li>Corre las pruebas automatizadas.</li>
+            <li>Arranca la demo; se detiene con Ctrl+C.</li>
+          </ol>
+          <p>Los comandos exactos están en el README del repositorio.</p>
+          <p data-bloque="enlace-repo"><a href="https://github.com/AlambritoDito/meson-reabasto-bot#readme">Abrir las instrucciones del README</a></p>
+        </div>
       </div>
     </section>
 
-    <section id="codigo" class="seccion seccion--alterna" aria-labelledby="t-codigo">
-      <div class="envoltura">
-        <h2 id="t-codigo">Código y licencia</h2>
-        <p>Equipo 3: Alan Pérez Fernández, Santiago Vázquez Llanes, Santiago Pineda Sotelo y Julián González Lepe.</p>
-        <p>El código del bot, los datos ficticios de muestra y la documentación se publican bajo licencia MIT.</p>
-        <p class="nota" data-bloque="aviso-repo" hidden>Repositorio pendiente de publicar.</p>
-        <ul class="lista" data-bloque="enlace-repo">
-          <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot">Repositorio en GitHub</a></li>
-          <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/README.md">Instrucciones para instalarlo y apagarlo</a></li>
-          <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot/tree/main/docs">Documentación del agente</a></li>
-          <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/LICENSE">Licencia MIT</a></li>
-        </ul>
-        <h3>Sobre el aspecto</h3>
-        <p>Los colores de esta página están inspirados en la identidad pública del Mesón; los códigos exactos y el uso de marca están por confirmar con el cliente, y la tipografía es la del sistema. Dentro de Telegram, la fuente, los colores y las burbujas del chat los define la aplicación de cada persona; el bot solo controla el texto, los botones y los archivos que envía.</p>
+    <section id="codigo" class="seccion" aria-labelledby="t-codigo">
+      <div class="envoltura dos-columnas">
+        <div class="revelar">
+          <p class="kicker">Código</p>
+          <h2 id="t-codigo">Código y licencia</h2>
+        </div>
+        <div class="revelar">
+          <p>Equipo 3: Alan Pérez Fernández, Santiago Vázquez Llanes, Santiago Pineda Sotelo y Julián González Lepe.</p>
+          <p>El código del bot, los datos ficticios de muestra y la documentación se publican bajo licencia MIT.</p>
+          <p class="nota" data-bloque="aviso-repo" hidden>Repositorio pendiente de publicar.</p>
+          <ul class="lista" data-bloque="enlace-repo">
+            <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot">Repositorio en GitHub</a></li>
+            <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/README.md">Instrucciones para instalarlo y apagarlo</a></li>
+            <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot/tree/main/docs">Documentación del agente</a></li>
+            <li><a href="https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/LICENSE">Licencia MIT</a></li>
+          </ul>
+          <h3>Sobre el aspecto</h3>
+          <p>Los colores de esta página están inspirados en la identidad pública del Mesón; los códigos exactos y el uso de marca están por confirmar con el cliente, y la tipografía es la del sistema. Dentro de Telegram, la fuente, los colores y las burbujas del chat los define la aplicación de cada persona; el bot solo controla el texto, los botones y los archivos que envía.</p>
+        </div>
       </div>
     </section>
   </main>
