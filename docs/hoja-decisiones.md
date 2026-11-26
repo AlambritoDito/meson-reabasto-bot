@@ -68,3 +68,5 @@ Lo que esta primera versión no va a cubrir.
 ---
 
 Decisión técnica adicional (Alan): la IA se usa por API oficial. Proveedor: OpenAI; modelo: `gpt-6-luna` (Responses API).
+
+*Nota: la meta del indicador se añadió después como supuesto; ver `agente.md` §2.*

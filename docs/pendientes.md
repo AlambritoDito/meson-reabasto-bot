@@ -20,12 +20,13 @@ Acompaña a `agente.md` (versión de entrega, 2026-11-25). Aquí se reúnen todo
 | S12 | Retención de 7 días, base local, `/borrar`; no se guardan nombre ni usuario | §8 |
 | S13 | Exclusiones adicionales de la demo: porciones por platillo, OCR/voz, otros canales, datos reales, disponibilidad permanente | §15 |
 | S14 | Cada insumo tiene un solo proveedor y una sola unidad; los mínimos y máximos del archivo son los vigentes | §8, §9 |
+| S15 | Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado ni una promesa; «faltante crítico» depende de P9 | §2, §14 |
 
 ## Pendientes: sin dato
 
 | # | Pendiente | Dónde (agente.md) |
 |---|---|---|
-| P1 | Meta numérica del indicador, fórmula exacta y frecuencia de revisión | §2, §14 |
+| P1 | Fórmula exacta del indicador y frecuencia de revisión (la meta quedó como supuesto S15) | §2, §14 |
 | P2 | Si «encargado de inventarios o compras» y «responsable de compras» son la misma persona | §3 |
 | P3 | Plazo de respuesta del aprobador | §6 |
 | P4 | Hora exacta de exportación del inventario | §8 |
@@ -41,7 +42,7 @@ Acompaña a `agente.md` (versión de entrega, 2026-11-25). Aquí se reúnen todo
 - **a) Columna «costo»:** se incluye como supuesto S5.
 - **b) Activación:** la hoja dice «mensaje al bot». La entrega lo precisa como enviar el archivo exportado (o `/muestra`) [hoja, precisado].
 - **c) Usuario frente a aprobador:** sigue abierto (P2).
-- **d) Indicador sin línea base ni meta:** se mantiene así. El objetivo cualitativo fue confirmado por Alan (P1).
+- **d) Indicador sin línea base ni meta:** se mantiene así. El objetivo cualitativo fue confirmado por Alan; la meta numérica quedó como supuesto (S15) y la fórmula sigue pendiente (P1).
 - **e) Temporada al alza topada por el máximo:** consecuencia documentada en S4.
 
 ## Operación de la demo (Alan)

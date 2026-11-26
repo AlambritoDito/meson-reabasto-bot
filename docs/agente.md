@@ -29,7 +29,7 @@ MesonBot toma el inventario que exporta el sistema, detecta qué insumos quedaro
 - **Indicador principal [hoja]:** cantidad de faltantes de insumos por semana.
 - **Indicador secundario [hoja]:** tiempo necesario para revisar el inventario y generar una propuesta de compra.
 - **Línea base [hoja]:** no hay línea base cuantificada; se usan datos simulados.
-- **Meta numérica:** Pendiente: sin dato. El objetivo cualitativo es el de la sección 1 [confirmado por Alan].
+- **Meta [supuesto, ver S15]:** Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado obtenido ni una promesa: la demo usa datos ficticios y no mide nada real. «Faltante crítico» aún no tiene definición del cliente (pendiente P9 en `pendientes.md`). El objetivo cualitativo es el de la sección 1 [confirmado por Alan].
 
 La demo usa datos ficticios y no mide ni acredita mejoras reales.
 
@@ -212,7 +212,8 @@ Temporada sobre Jitomate:
 - **Principal [hoja]:** faltantes de insumos por semana.
 - **Secundario [hoja]:** tiempo de revisión del inventario y de generación de la propuesta.
 - **Línea base [hoja]:** no cuantificada.
-- **Meta numérica, fórmula exacta y frecuencia de revisión:** Pendiente: sin dato.
+- **Meta [supuesto, ver S15]:** Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado obtenido ni una promesa: la demo usa datos ficticios y no mide nada real. «Faltante crítico» aún no tiene definición del cliente (pendiente P9 en `pendientes.md`).
+- **Fórmula exacta y frecuencia de revisión:** Pendiente: sin dato.
 - La demo no produce indicadores reales. Los conteos de uso de IA sirven solo para operar los límites.
 
 ## 15. Fuera de alcance
