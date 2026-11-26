@@ -18,6 +18,7 @@
       <a class="marca" href="#titulo">MesonBot <span class="marca__nota">demo</span></a>
       <nav class="nav" aria-label="Secciones de la página">
         <ul class="menu">
+          <li><a href="#video"><span aria-hidden="true">▶</span> Video</a></li>
           <li><a href="#problema"><span aria-hidden="true">01</span> Problema</a></li>
           <li><a href="#recorrido"><span aria-hidden="true">02</span> Recorrido</a></li>
           <li><a href="#roles"><span aria-hidden="true">03</span> Quién hace qué</a></li>
@@ -82,6 +83,38 @@
       </div>
       <div class="envoltura">
         <p class="portada__aviso">Proyecto académico independiente. No es un sitio oficial del Mesón; colores inspirados en su identidad pública.</p>
+      </div>
+    </section>
+
+    <section id="video" class="seccion seccion--alterna seccion--video" aria-labelledby="t-video">
+      <div class="envoltura">
+        <div class="revelar">
+          <p class="kicker">Video</p>
+          <h2 id="t-video">Mira la demo en 56 segundos</h2>
+        </div>
+        <figure class="video revelar">
+          <div class="video__marco">
+            <video controls preload="none" playsinline poster="media/poster.png" width="1920" height="1080" aria-describedby="video-desc">
+              <source src="media/mesonbot-16x9.mp4" type="video/mp4">
+              Tu navegador no puede reproducir este video. <a href="media/mesonbot-16x9.mp4">Descárgalo en MP4</a>.
+            </video>
+          </div>
+          <figcaption>Video ilustrativo con datos ficticios; música y efectos sintetizados para el proyecto. Sin narración. <a href="media/mesonbot-16x9.mp4" download>Descargar el video (MP4, 15 MB)</a></figcaption>
+        </figure>
+        <details class="video__desc revelar" id="video-desc">
+          <summary>Descripción del video en texto</summary>
+          <ol>
+            <li>Plantea el problema: faltantes que se detectan tarde, inventario revisado a mano fila por fila y pedidos de último momento.</li>
+            <li>Presenta a MesonBot, asistente de reabastecimiento en Telegram (proyecto académico, demo con datos ficticios).</li>
+            <li>Carga el inventario de muestra: 20 insumos, 6 bajo su mínimo y 1 fila excluida por dato faltante.</li>
+            <li>Muestra la propuesta por proveedor con la regla máximo − existencia (por ejemplo, leche 60 − 8 = 52) y un total estimado de $6808.00, junto a una captura real del bot.</li>
+            <li>Ajusta por temporada: café en grano de 13 a 7 kg y total de $6808.00 a $5128.00; nada cambia hasta confirmar.</li>
+            <li>La IA explica la propuesta con las cifras del programa (captura real); no calcula ni aprueba.</li>
+            <li>Una persona aprueba la propuesta v2 y recibe el borrador; el bot nunca envía nada a proveedores.</li>
+            <li>Muestra el borrador y el historial de versiones, y resume quién hace qué: el programa calcula, la IA explica y tú decides.</li>
+            <li>Cierra con el enlace t.me/mesondemobot, la página del proyecto y un QR; recuerda que el bot responde durante las sesiones de demostración, hasta el 10 de diciembre de 2026.</li>
+          </ol>
+        </details>
       </div>
     </section>
 

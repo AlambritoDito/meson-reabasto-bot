@@ -11,6 +11,7 @@ Proyecto académico de demostración con datos ficticios. El agente propone y re
 3. **Agente configurado:**
    - Bot de Telegram: [t.me/mesondemobot](https://t.me/mesondemobot). Responde solo durante las sesiones de demostración, mientras corre en el equipo de la persona responsable; fuera de ellas el chat abre, pero no hay respuesta.
    - Página explicativa con QR: [alambritodito.github.io/meson-reabasto-bot](https://alambritodito.github.io/meson-reabasto-bot/)
+   - Video de la demo (56 s, datos ficticios): [mesonbot-16x9.mp4](https://alambritodito.github.io/meson-reabasto-bot/media/mesonbot-16x9.mp4) · [en la página](https://alambritodito.github.io/meson-reabasto-bot/#video)
    - Configuración (instrucciones del modelo y qué hace el programa): [docs/configuracion.md](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/configuracion.md)
    - **Capturas:** ver [Capturas del recorrido en vivo](#capturas-del-recorrido-en-vivo) más abajo.
 4. **Registro de pruebas con los cinco casos:** [docs/registro-pruebas.md](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/registro-pruebas.md)
