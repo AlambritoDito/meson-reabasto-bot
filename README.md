@@ -50,7 +50,7 @@ Si la IA no está configurada, falla o se agota el cupo, el bot sigue funcionand
                                             └──► API de OpenAI (Responses API): clasifica y explica
 ```
 
-El poller es `backend/scripts/poll.mjs`: es el único consumidor de `getUpdates`, reenvía cada update a `POST /tg` del Worker local con el encabezado de `WEBHOOK_SECRET` y solo avanza cuando el Worker responde 2xx. `npm run demo` (`backend/scripts/demo.mjs`) aplica migraciones, levanta `wrangler dev` en `127.0.0.1:8787` y arranca el poller.
+El poller es `backend/scripts/poll.mjs`: es el único consumidor de `getUpdates` (long polling; no hay webhook de Telegram activo) y reenvía cada update al manejador de actualizaciones del bot, `POST /tg` del Worker local con el encabezado de `WEBHOOK_SECRET` y solo avanza cuando el Worker responde 2xx. `npm run demo` (`backend/scripts/demo.mjs`) aplica migraciones, levanta `wrangler dev` en `127.0.0.1:8787` y arranca el poller.
 
 No hay servidor permanente: el bot existe mientras el proceso corre. Al cerrarlo, deja de responder. El token y la clave viven solo en `backend/.dev.vars` (ignorado por Git); nunca en la página, el QR, el repositorio ni los mensajes de error.
 
@@ -76,7 +76,7 @@ cp .dev.vars.example .dev.vars
 # Edita .dev.vars (ignorado por Git):
 #   TELEGRAM_BOT_TOKEN=        token de tu bot de @BotFather (obligatorio)
 #   OPENAI_API_KEY=            tu clave de OpenAI con tope de gasto (sin ella, el bot responde «sin IA»)
-#   WEBHOOK_SECRET=            cadena aleatoria larga; la usan el poller y el Worker local entre sí (obligatorio)
+#   WEBHOOK_SECRET=            cadena aleatoria larga; secreto compartido entre el poller y el Worker local (obligatorio; el nombre es histórico: no hay webhook de Telegram)
 #   OPENAI_MODEL=gpt-6-luna    (obligatorio; vacío = sin IA)
 #   OPENAI_REASONING_EFFORT=low
 #   DEMO_UNTIL=2026-12-10      fecha fin de la demo (hasta el final de ese día, hora de CDMX; obligatorio)
@@ -127,7 +127,7 @@ Los límites están en `backend/src/config.ts`. Si un dato requerido falta o es 
 - **IA:** OpenAI cobra por uso a quien pone la clave. Consulta las tarifas vigentes en la [página oficial de precios de OpenAI](https://openai.com/api/pricing/) antes de usar; pueden cambiar.
   - **Estimación del proyecto (no es gasto medido):** unos US$0.18 por 300 llamadas cortas, que es el límite diario global del código.
   - El código limita el número de consultas y el largo de las respuestas; el **tope duro de gasto por proyecto** en el panel de OpenAI es la protección final. Configúralo antes de arrancar.
-  - Tope de gasto de la demo pública aprobado por Alan: **US$5 en total**, como tope duro del proyecto en el panel de OpenAI, más `MAX_AI_CALLS_TOTAL=1000` en el código. Gasto estimado ≈ US$0.18 (estimación, no gasto medido).
+  - Demo pública: Alan aprobó un tope de **US$5 en total**. En el código rige `MAX_AI_CALLS_TOTAL=1000`; el tope duro del proyecto en el panel de OpenAI es la recomendación, y su configuración la confirma el responsable. Gasto estimado ≈ US$0.18 (estimación, no gasto medido).
 - **Telegram Bot API:** sin costo.
 - **Ejecución local:** sin costo de hosting; el bot depende de que tu computadora esté encendida y conectada.
 - **GitHub Pages:** sin costo para repositorios públicos.

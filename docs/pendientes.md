@@ -15,7 +15,7 @@ Acompaña a `agente.md` (versión de entrega, 2026-11-25). Aquí se reúnen todo
 | S7 | Si el aprobador no responde, la propuesta queda sin aprobar y no ocurre nada más | §6, §12 |
 | S8 | Desglose de la RACI por función a partir de la RACI general de la hoja, con un solo A por función | §6 |
 | S9 | Reparto interno: el programa calcula y prepara el borrador con plantilla fija; la IA solo interpreta y explica | §3, §4 |
-| S10 | Identidad «MesonBot», asistente automático de demostración; tono de tú, mensajes cortos, sin emojis | §11, §13 |
+| S10 | Identidad «MesonBot», asistente automático de demostración; tono de tú, mensajes cortos, emojis moderados con significado fijo [confirmado por Alan] | §11, §13 |
 | S11 | Paleta inspirada en la identidad pública del Mesón [confirmado por Alan como dirección; códigos exactos y uso de marca por confirmar con el cliente]. Tipografía del sistema. En Telegram la apariencia es nativa | §13 |
 | S12 | Retención de 7 días, base local, `/borrar`; no se guardan nombre ni usuario | §8 |
 | S13 | Exclusiones adicionales de la demo: porciones por platillo, OCR/voz, otros canales, datos reales, disponibilidad permanente | §15 |
@@ -25,29 +25,29 @@ Acompaña a `agente.md` (versión de entrega, 2026-11-25). Aquí se reúnen todo
 
 | # | Pendiente | Dónde (agente.md) |
 |---|---|---|
-| P2 | Meta numérica del indicador, fórmula exacta y frecuencia de revisión | §2, §14 |
-| P3 | Si «encargado de inventarios o compras» y «responsable de compras» son la misma persona | §3 |
-| P4 | Plazo de respuesta del aprobador | §6 |
-| P5 | Hora exacta de exportación del inventario | §8 |
-| P6 | Unidades, redondeos finales y pedidos en tránsito | §9 |
-| P7 | Días y horarios en que cada proveedor recibe pedidos | §10 |
-| P8 | Tiempos de entrega de cada proveedor | §10 |
-| P9 | Proveedor que no surte o pedido parcial | §10, §12 |
-| P10 | Faltante crítico y a quién se alerta | §12 |
-| P11 | Formato definitivo del mensaje al proveedor | §11 |
+| P1 | Meta numérica del indicador, fórmula exacta y frecuencia de revisión | §2, §14 |
+| P2 | Si «encargado de inventarios o compras» y «responsable de compras» son la misma persona | §3 |
+| P3 | Plazo de respuesta del aprobador | §6 |
+| P4 | Hora exacta de exportación del inventario | §8 |
+| P5 | Unidades, redondeos finales y pedidos en tránsito | §9 |
+| P6 | Días y horarios en que cada proveedor recibe pedidos | §10 |
+| P7 | Tiempos de entrega de cada proveedor | §10 |
+| P8 | Proveedor que no surte o pedido parcial | §10, §12 |
+| P9 | Faltante crítico y a quién se alerta | §12 |
+| P10 | Formato definitivo del mensaje al proveedor | §11 |
 
 ## Tensiones de la hoja y cómo quedaron en la entrega
 
 - **a) Columna «costo»:** se incluye como supuesto S5.
 - **b) Activación:** la hoja dice «mensaje al bot». La entrega lo precisa como enviar el archivo exportado (o `/muestra`) [hoja, precisado].
-- **c) Usuario frente a aprobador:** sigue abierto (P3).
-- **d) Indicador sin línea base ni meta:** se mantiene así. El objetivo cualitativo fue confirmado por Alan (P2).
+- **c) Usuario frente a aprobador:** sigue abierto (P2).
+- **d) Indicador sin línea base ni meta:** se mantiene así. El objetivo cualitativo fue confirmado por Alan (P1).
 - **e) Temporada al alza topada por el máximo:** consecuencia documentada en S4.
 
 ## Operación de la demo (Alan)
 
-- Responsable operativo y horario de las sesiones: pendiente.
-- Tope de gasto: US$5 en total aprobado por Alan (tope duro del proyecto en OpenAI + `MAX_AI_CALLS_TOTAL=1000`). Hay que configurarlo en el panel de OpenAI antes de la primera sesión.
-- Titular de la licencia: «Alan Pérez y colaboradores del proyecto» (confirmado).
-- Repositorio público y URL de GitHub Pages: pendientes de crear y publicar.
-- Fin de la demo pública: 10 de diciembre de 2026. Después hay que revocar token y clave según `README.md`.
+- **Publicado:** repositorio <https://github.com/AlambritoDito/meson-reabasto-bot> y página <https://alambritodito.github.io/meson-reabasto-bot/>.
+- **Bot:** corre en el equipo del responsable (el dueño del repositorio) solo durante las sesiones de demostración, hasta el 10 de diciembre de 2026. Después hay que revocar token y clave según `README.md`.
+- **Gasto de IA:** el código limita a 1000 consultas totales (`MAX_AI_CALLS_TOTAL`), 3 por minuto y 20 por día por chat, y 300 por día en total. Se recomienda además un tope duro del proyecto en el panel del proveedor (US$5 aprobado por Alan); su configuración la confirma el responsable.
+- **Horario de las sesiones:** sin dato.
+- **Licencia:** MIT; titulares: los cuatro integrantes del Equipo 3 (ver `LICENSE`).

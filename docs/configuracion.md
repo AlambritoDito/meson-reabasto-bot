@@ -54,7 +54,7 @@ El modelo no recibe la responsabilidad de: validar el archivo, comparar contra m
 
 Antes de declarar el bot configurado:
 
-1. La demo arranca con un solo proceso leyendo actualizaciones (long polling), sin webhook activo, y `.dev.vars` no está en Git.
+1. La demo arranca con un solo proceso leyendo actualizaciones por long polling, que alimenta el manejador de actualizaciones del bot (ruta POST /tg); no hay webhook de Telegram activo, y `.dev.vars` no está en Git.
 2. `/start` y `/ayuda` responden desde un teléfono distinto al del operador.
 3. `/muestra` carga 20 insumos, marca 6 bajo mínimo y señala el insumo sin proveedor.
 4. Las cantidades que muestra el bot coinciden con un cálculo independiente de la regla propuesta.
