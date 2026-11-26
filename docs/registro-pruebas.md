@@ -5,13 +5,13 @@ Los cinco casos se probaron el 25 de noviembre de 2026 de dos maneras:
 - **Pruebas automáticas con Telegram y la IA simulados.** Un programa de pruebas hace el papel de Telegram y de la IA para revisar el comportamiento del bot sin depender de servicios externos. Las hizo una persona o herramienta distinta de quien programó el bot.
 - **Prueba en vivo con Telegram y la IA reales.** Recorrido hecho en el chat real del bot. Ver «Recorrido en vivo» más abajo.
 
-La tabla dice en qué forma se comprobó cada caso.
+Los cinco casos se comprobaron en ambas formas. La tabla indica en qué paso del recorrido en vivo se vio cada uno.
 
 Regla aplicada: propuesta para la demo, no política confirmada del restaurante. Un insumo entra al pedido si `existencia < mínimo`, y la cantidad es `máximo − existencia`, redondeada hacia arriba y sin superar el máximo.
 
 | Caso | Entrada / acción | Resultado esperado | Resultado obtenido | Cómo se comprobó | Ajuste al agente.md |
 |---|---|---|---|---|---|
-| 1. Inventario sin faltantes | Subir `fixtures/inventario-sin-faltantes.csv` | Ningún insumo en el pedido; el bot lo dice y explica por qué; no propone compras innecesarias | «Ningún insumo válido está bajo su mínimo. No propongo compras.» No aparecen botones para aprobar, y `/aprobar` responde «No hay nada que aprobar». No se consulta la IA. | **Solo en simulación**; no se repitió en vivo | Ninguno |
+| 1. Inventario sin faltantes | Subir `fixtures/inventario-sin-faltantes.csv` | Ningún insumo en el pedido; el bot lo dice y explica por qué; no propone compras innecesarias | «Ningún insumo válido está bajo su mínimo. No propongo compras.» No aparecen botones para aprobar, y `/aprobar` responde «No hay nada que aprobar». No se consulta la IA. | En simulación y en vivo (paso 10, con carga real de un archivo CSV) | Ninguno |
 | 2. Varios insumos bajo mínimo | `/muestra` (`fixtures/inventario-muestra.csv`) | 6 insumos bajo mínimo con cantidad = máximo − existencia, agrupados por proveedor; p. ej. Leche entera 52 litros, Jitomate 17 kg; Azucar (10 = mínimo) no entra | «6 insumos bajo mínimo» en 4 proveedores. Subtotales: Lácteos $1626.00, Café $3640.00, Abarrotes $546.00 y Verduras $996.00; total estimado $6808.00, que coincide con un cálculo hecho por separado. Botones «Aprobar v1 / Rechazar v1». | En simulación y en vivo (paso 2) | Se agregó el botón «Rechazar» junto a «Aprobar», como pide la hoja del equipo («aprobar o rechazar pedidos»). Está reflejado en permisos, flujo y RACI. |
 | 3. Dato faltante | Muestra con «Vasos desechables» sin proveedor | Señala fila y campo; no inventa el valor; no permite aprobar un pedido con esa fila como si fuera válida | La propuesta y el borrador dicen «fila 20 (Vasos desechables): proveedor vacío», y el borrador no incluye los vasos. Solo se aprueban las filas válidas. | En simulación y en vivo (paso 2) | Ninguno. La política de «aprobar solo las filas válidas» es un supuesto de la demo (S6 en `pendientes.md`), por confirmar con el cliente. |
 | 4. Ajuste por temporada | Bajar 50 % al proveedor «Cafe Ficticio del Valle»; también se probaron +20 % y +80 % | Muestra antes y después, respeta el rango permitido y el máximo, pide confirmación y registra la versión en `/historial` | Vista previa: «Cafe en grano: 13 → 7 kg… Total: $6808.00 → $5128.00. Nada cambia hasta que confirmes». Al confirmar se crea la versión 2 ($5128.00), queda en el historial y ya no se puede aprobar la versión 1. Cancelar no cambia nada. Con +20 % todo queda topado por el máximo y el bot lo avisa; +80 % se limita a 50 %. | En simulación y en vivo (pasos 3–4) | Se documentó que un ajuste al alza no aumenta lo que ya llegó al máximo (§9, ejemplo con +20 %). |
@@ -43,7 +43,7 @@ Ajustes tras esa revisión:
 
 - **Quién y cómo:** el asistente coordinador del proyecto, desde Telegram Web, con la sesión de un integrante del equipo.
 - **Dónde corría el bot:** `@mesondemobot`, en el equipo del responsable, con la base de datos local.
-- **Horario:** 13:17–13:18, hora de la Ciudad de México. Solo se escribió en el chat del bot.
+- **Horario:** pasos 1–9 de 13:17 a 13:18, y paso 10 a las 21:15, hora de la Ciudad de México. Solo se escribió en el chat del bot.
 
 | # | Acción | Obtenido | Resultado | Captura |
 |---|---|---|---|---|
@@ -56,8 +56,9 @@ Ajustes tras esa revisión:
 | 7 | Segundo clic en un botón «Aprobar v2» anterior | Aviso «La v2 ya estaba aprobada…»; no hay segundo borrador | Correcto (no se duplica) | sin captura |
 | 8 | Texto libre: «paga la factura del proveedor y cuéntame un chiste» | «Eso está fuera de lo que hago…»; nada cambia | Correcto (caso 5 con IA real) | [08](capturas/08-fuera-de-alcance.jpg) |
 | 9 | «Historial» | v1 carga (20 filas, 6 bajo mínimo, 1 excluida); v2 ajuste −50 % confirmado por la persona; v2 aprobada, total $5128.00 | Correcto | [09](capturas/09-historial.jpg) |
+| 10 | Subir el archivo `inventario-sin-faltantes.csv` (8 insumos) | «Propuesta v1 · archivo inventario-sin-faltantes.csv · 8 insumos… Ningún insumo válido está bajo su mínimo. No propongo compras.» Sin botones de aprobar | Correcto (caso 1 en vivo; también comprueba la carga real de un CSV) | [10](capturas/10-sin-faltantes.jpg) |
 
-**No probado en este recorrido:** subir un archivo propio (CSV/XLSX), Rechazar, «Borrar mis datos» (se dejó intacta la sesión del integrante), segundo usuario y escaneo del QR con teléfono. Las capturas reales están en [`docs/capturas/`](capturas/) (galería con pies de foto en [ENTREGA.md](ENTREGA.md#capturas-del-recorrido-en-vivo)).
+**No probado en este recorrido:** subir un archivo XLSX, Rechazar, «Borrar mis datos» (se dejó intacta la sesión del integrante), segundo usuario y escaneo del QR con teléfono. Las capturas reales están en [`docs/capturas/`](capturas/) (galería con pies de foto en [ENTREGA.md](ENTREGA.md#capturas-del-recorrido-en-vivo)).
 
 ## Anexo técnico
 
@@ -65,7 +66,7 @@ Datos para reproducir o auditar. No se publican identificadores de chat, tokens 
 
 - **Versiones del código.** Un *commit* es una versión guardada del código, identificada por un código corto.
   - Pruebas automáticas de los casos 1–5: commit `4adc55b`.
-  - Recorrido en vivo: commit `a296639`.
+  - Recorrido en vivo, pasos 1–9: commit `a296639`. El paso 10 (21:15) se hizo con el bot en el mismo equipo; no se registró su commit.
   - La versión publicada que cita la entrega es la más reciente de la rama `main`.
 - **Conteos de pruebas automáticas.**
   - 96 de 96 pasaron en la revisión de los casos, y 15 de 15 en el recorrido local con Telegram simulado.

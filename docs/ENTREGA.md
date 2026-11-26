@@ -39,7 +39,7 @@ npm run demo                  # enciende el bot en local; Ctrl+C lo apaga
 
 ## Capturas del recorrido en vivo
 
-Capturas reales del recorrido en vivo; no son montajes. El bot corría en el equipo del responsable con Telegram y OpenAI reales. Telegram Web, chat con @mesondemobot, 2026-11-25, 13:17–13:18 (hora de la Ciudad de México). Detalle de cada paso en el [registro de pruebas](registro-pruebas.md#recorrido-en-vivo-por-telegram-real-2026-11-25). El paso 7 (segundo clic en «Aprobar v2», sin segundo borrador) no tiene captura.
+Capturas reales del recorrido en vivo; no son montajes. El bot corría en el equipo del responsable con Telegram y OpenAI reales. Telegram Web, chat con @mesondemobot, 2026-11-25, de 13:17 a 13:18 (pasos 1–9) y a las 21:15 (paso 10), hora de la Ciudad de México. Detalle de cada paso en el [registro de pruebas](registro-pruebas.md#recorrido-en-vivo-por-telegram-real-2026-11-25). El paso 7 (segundo clic en «Aprobar v2», sin segundo borrador) no tiene captura.
 
 ![Paso 1 · /start: saludo de asistente de demostración y menú con botones](capturas/01-menu-inicio.jpg)
 *Paso 1 · /start: saludo de asistente de demostración y menú con botones (2026-11-25, 13:17).*
@@ -67,6 +67,9 @@ Capturas reales del recorrido en vivo; no son montajes. El bot corría en el equ
 
 ![Paso 9 · Historial: carga v1, ajuste −50 % confirmado y v2 aprobada](capturas/09-historial.jpg)
 *Paso 9 · Historial: carga v1, ajuste −50 % confirmado y v2 aprobada (2026-11-25, 13:18).*
+
+![Paso 10 · 21:15 · inventario sin faltantes: no propone compras](capturas/10-sin-faltantes.jpg)
+*Paso 10 · 21:15 · inventario sin faltantes: no propone compras (2026-11-25).*
 
 ## Código y licencia
 
