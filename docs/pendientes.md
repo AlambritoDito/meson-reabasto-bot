@@ -42,7 +42,7 @@ Acompaña a `agente.md` (versión de entrega, 2026-11-25). Aquí se reúnen todo
 - **a) Columna «costo»:** se incluye como supuesto S5.
 - **b) Activación:** la hoja dice «mensaje al bot». La entrega lo precisa como enviar el archivo exportado (o `/muestra`) [hoja, precisado].
 - **c) Usuario frente a aprobador:** sigue abierto (P2).
-- **d) Indicador sin línea base ni meta:** se mantiene así. El objetivo cualitativo fue confirmado por Alan; la meta numérica quedó como supuesto (S15) y la fórmula sigue pendiente (P1).
+- **d) Indicador sin línea base:** se mantiene; la meta numérica se añadió como supuesto S15. El objetivo cualitativo fue confirmado por Alan y la fórmula sigue pendiente (P1).
 - **e) Temporada al alza topada por el máximo:** consecuencia documentada en S4.
 
 ## Operación de la demo (Alan)

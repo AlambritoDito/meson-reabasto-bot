@@ -2,7 +2,7 @@
 
 Los cinco casos se probaron el 25 de noviembre de 2026 de dos maneras:
 
-- **Pruebas automáticas con Telegram y la IA simulados.** Un programa de pruebas hace el papel de Telegram y de la IA para revisar el comportamiento del bot sin depender de servicios externos. Las hizo una persona o herramienta distinta de quien programó el bot.
+- **Pruebas automáticas con Telegram y la IA simulados.** Un programa de pruebas hace el papel de Telegram y de la IA para revisar el comportamiento del bot sin depender de servicios externos. Las hizo un asistente de IA distinto del que programó el bot, con resultados revisados por el equipo.
 - **Prueba en vivo con Telegram y la IA reales.** Recorrido hecho en el chat real del bot. Ver «Recorrido en vivo» más abajo.
 
 Los cinco casos se comprobaron en ambas formas. La tabla indica en qué paso del recorrido en vivo se vio cada uno.
@@ -62,7 +62,7 @@ Ajustes tras esa revisión:
 
 ## Anexo técnico
 
-Datos para reproducir o auditar. No se publican identificadores de chat, tokens ni claves.
+Datos para reproducir o auditar. No se publican identificadores de chat, la clave del bot ni la clave de la IA.
 
 - **Versiones del código.** Un *commit* es una versión guardada del código, identificada por un código corto.
   - Pruebas automáticas de los casos 1–5: commit `4adc55b`.
@@ -77,6 +77,6 @@ Datos para reproducir o auditar. No se publican identificadores de chat, tokens 
   - `inventario-muestra.csv`: 626365fc…5d76.
 - **IA real.**
   - Modelo `gpt-6-luna` con esfuerzo de razonamiento «low».
-  - Primera prueba: 6 llamadas, todas correctas (HTTP 200); 2129 tokens de entrada y 365 de salida. Un *token* es un fragmento de texto con el que se mide y cobra el uso de la IA. Costo medido: US$0.000396.
+  - Primera prueba: 6 llamadas, todas correctas (HTTP 200); 2129 tokens de entrada y 365 de salida. Aquí *token* significa unidad de texto de la IA, con la que se mide y cobra su uso; no es la clave del bot. Costo medido: US$0.000396.
   - Prueba posterior de la explicación: 1 llamada, 614 tokens de entrada y 203 de salida, US$0.000163.
   - Un primer intento no pudo hacerse porque la cuenta del proveedor no tenía saldo; se repitió después de cargarlo.

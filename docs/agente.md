@@ -4,13 +4,13 @@
 
 **Etiquetas.** Cada afirmación lleva su origen:
 
-- **[hoja]**: respuesta del equipo en `hoja-decisiones.md`.
+- **[hoja]**: respuesta del equipo en la [hoja de decisiones](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/hoja-decisiones.md).
 - **[confirmado por Alan]**: decisión confirmada el 2026-11-25.
 - **[caso]**: consta en el enunciado del reto.
 - **[supuesto]**: supuesto de la demo, por confirmar con el cliente. Si además está en el código se marca **[supuesto, implementado]**.
 - **Pendiente: sin dato**: no hay información; no se inventa.
 
-Todos los supuestos y pendientes se listan también en `pendientes.md`.
+Todos los supuestos y pendientes se listan también en [pendientes y supuestos](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/pendientes.md).
 
 ## 1. Propósito y alcance
 
@@ -29,7 +29,7 @@ MesonBot toma el inventario que exporta el sistema, detecta qué insumos quedaro
 - **Indicador principal [hoja]:** cantidad de faltantes de insumos por semana.
 - **Indicador secundario [hoja]:** tiempo necesario para revisar el inventario y generar una propuesta de compra.
 - **Línea base [hoja]:** no hay línea base cuantificada; se usan datos simulados.
-- **Meta [supuesto, ver S15]:** Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado obtenido ni una promesa: la demo usa datos ficticios y no mide nada real. «Faltante crítico» aún no tiene definición del cliente (pendiente P9 en `pendientes.md`). El objetivo cualitativo es el de la sección 1 [confirmado por Alan].
+- **Meta [supuesto, ver S15]:** Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado obtenido ni una promesa: la demo usa datos ficticios y no mide nada real. «Faltante crítico» aún no tiene definición del cliente (pendiente P9 en [pendientes y supuestos](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/pendientes.md)). El objetivo cualitativo es el de la sección 1 [confirmado por Alan].
 
 La demo usa datos ficticios y no mide ni acredita mejoras reales.
 
@@ -46,7 +46,7 @@ La demo usa datos ficticios y no mide ni acredita mejoras reales.
 | Agente (programa + IA) | Lee, compara, calcula, propone, explica, prepara el borrador y registra | [hoja]; reparto programa/IA [supuesto, implementado] |
 | Visitante de la demo | Prueba con datos ficticios; aprueba o rechaza solo su simulación; no adquiere permisos de operador | [supuesto, implementado] |
 
-Si «encargado de inventarios o compras» [hoja] y «responsable de compras» [hoja] son la misma persona: Pendiente: sin dato (ver `pendientes.md`).
+Si «encargado de inventarios o compras» [hoja] y «responsable de compras» [hoja] son la misma persona: Pendiente: sin dato (ver [pendientes y supuestos](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/pendientes.md)).
 
 ## 4. Funciones del agente
 
@@ -68,7 +68,7 @@ Si «encargado de inventarios o compras» [hoja] y «responsable de compras» [h
 |---|---|---|
 | Hace solo | Consulta el inventario; identifica faltantes; calcula cantidades de reabastecimiento; redacta pedidos | [hoja] |
 | | Valida el archivo, alerta datos faltantes, explica, registra historial | [supuesto, implementado] |
-| Con autorización de una persona | Confirma propuestas de compra; ajusta cantidades por temporada; autoriza el pedido | [hoja] |
+| Con autorización de una persona | Confirma propuestas de compra; ajusta cantidades por temporada [hoja]. Prepara la propuesta para que el responsable de compras la autorice [hoja, precisado]: el agente nunca autoriza | [hoja] |
 | No hace nunca | Pagos; modificar mínimos y máximos; seleccionar nuevos proveedores; compras sin autorización | [hoja] |
 | | Enviar el pedido al proveedor (fuera de alcance [hoja]); inventar cantidades o datos faltantes | [supuesto, implementado] |
 
@@ -86,7 +86,7 @@ Desglose por función **[supuesto]**, con un solo A por función:
 | Aprobar o rechazar el pedido | Responsable de compras | Responsable de compras | Personal de cocina | Administrador |
 | Preparar el borrador | Agente (programa, plantilla) | Responsable de compras | — | Encargado de inventarios |
 | Enviar el pedido al proveedor | Una persona (fuera del bot) | Responsable de compras | — | Administrador |
-| Fijar mínimos y máximos | Cliente [caso] | Cliente | Responsable de compras | Encargado de inventarios |
+| Fijar mínimos y máximos | Cliente [caso] | Persona designada por el restaurante (Pendiente: sin dato) | Responsable de compras | Encargado de inventarios |
 
 **Autorización:** el responsable de compras aprueba o rechaza con los botones «Aprobar» / «Rechazar» en Telegram [hoja]. Si no responde, la propuesta queda sin aprobar y no ocurre nada más [supuesto]. Plazo de respuesta: Pendiente: sin dato.
 
@@ -205,6 +205,9 @@ Temporada sobre Jitomate:
   - No se usan logotipos, fotos, iconos ni lemas del Mesón. La página aclara que es un proyecto académico independiente y no un sitio oficial.
 - **Tipografía [supuesto]:** fuentes del sistema, sin fuentes externas. Titulares gruesos con `ui-rounded` y respaldo; texto base de 17 px.
 - **Objetivos de diseño:** contraste de nivel AA; alertas con texto e icono, no solo color.
+- **Color de alerta [supuesto]:** `#b23a12` (borde de los avisos de alerta; el texto va en `#6e260a` sobre fondo `#fbe1d3`; en modo oscuro, borde `#ff9f5a`). Siempre va acompañado de icono y de la palabra «Bajo mínimo», así que no depende solo del color.
+- **Cifras en tablas [supuesto]:** mínimo 15.6 px (`0.975rem`; el texto general mide 17 px).
+- Ambos valores aplican a la página. En Telegram la apariencia es nativa y la alerta se marca con 🚨 y texto.
 - **Límite de lo controlable:** en Telegram la fuente, los colores, el tema y las burbujas son nativos de la aplicación de cada persona. El bot solo controla texto, botones y archivos.
 
 ## 14. Indicadores de seguimiento
@@ -212,7 +215,7 @@ Temporada sobre Jitomate:
 - **Principal [hoja]:** faltantes de insumos por semana.
 - **Secundario [hoja]:** tiempo de revisión del inventario y de generación de la propuesta.
 - **Línea base [hoja]:** no cuantificada.
-- **Meta [supuesto, ver S15]:** Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado obtenido ni una promesa: la demo usa datos ficticios y no mide nada real. «Faltante crítico» aún no tiene definición del cliente (pendiente P9 en `pendientes.md`).
+- **Meta [supuesto, ver S15]:** Valor actual: no medido (sin línea base). Meta propuesta [supuesto de la demo, no medido, por confirmar con el cliente]: 0 faltantes críticos por semana y revisión del inventario con propuesta lista en menos de 10 minutos. No es un resultado obtenido ni una promesa: la demo usa datos ficticios y no mide nada real. «Faltante crítico» aún no tiene definición del cliente (pendiente P9 en [pendientes y supuestos](https://github.com/AlambritoDito/meson-reabasto-bot/blob/main/docs/pendientes.md)).
 - **Fórmula exacta y frecuencia de revisión:** Pendiente: sin dato.
 - La demo no produce indicadores reales. Los conteos de uso de IA sirven solo para operar los límites.
 
